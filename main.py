@@ -4,6 +4,9 @@ import socket
 import pickle
 import random
 
+# teclas para mover las barras: {s,x} y {k,m}.
+
+# colores
 BLACK = (0, 0, 0)
 GREY = (50,50,50)
 WHITE = (255, 255, 255)
@@ -11,28 +14,33 @@ RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 YELLOW = (255,255,0)
 GREEN = (0,255,0)
-BLUE_3 = (0, 255, 196)
+
 BLUE_1 = (0, 50, 255)
 BLUE_2 = (0, 0, 75)
 RED_1 = (255, 0, 0)
 RED_2 = (120, 0, 0)
-RED_3 = (75, 0, 0)
-COLORS_BLOCK = [[RED_1, RED_2, RED_3], [BLUE_1, BLUE_2, BLUE_3]]
+
+COLORS_BLOCK = [[RED_1, RED_2], [BLUE_1, BLUE_2]]
+PLAYER_COLOR = [RED, BLUE]
+
+# ejes
 X = 0
 Y = 1
 SIZE = (700, 525)
 
+# player 
 LEFT_PLAYER = 0
 RIGHT_PLAYER = 1
-PLAYER_COLOR = [RED, BLUE]
 PLAYER_HEIGHT = 60
 PLAYER_WIDTH = 10
 
+# ball & block
 BALL_COLOR = WHITE
 BALL_SIZE = 12
 BLOCK_SIZE = 40
 FPS = 60
 DELTA = 5 #30
+VEL_BALL_X, VEL_BALL_Y = 2, 3 # velocidad de la bola
 
 SIDES = ["left", "right"]
 
@@ -91,8 +99,8 @@ class Ball():
 class Game():
     def __init__(self):
         self.players = [Player(i) for i in range(2)]
-        self.ball_1 = Ball([-2,3], color=0)
-        self.ball_2 = Ball([2,3], color=1)
+        self.ball_1 = Ball([-1*VEL_BALL_X, VEL_BALL_Y], color=0)
+        self.ball_2 = Ball([VEL_BALL_X, VEL_BALL_Y], color=1)
         self.score = [0,0]
         self.running = True
 
@@ -223,7 +231,7 @@ class Display():
 
         self.screen = pygame.display.set_mode(SIZE)
         self.clock =  pygame.time.Clock()  #FPS
-        self.background = pygame.image.load('ping_pong/background.png')
+        self.background = pygame.image.load('images/background.png')
         running = True
         pygame.init()
 
