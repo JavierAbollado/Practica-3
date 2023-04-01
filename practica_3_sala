@@ -107,46 +107,7 @@ class Ball():#done
         return f"B<{self.pos, self.velocity}>"
 
 
-class Game():
-    
 
-    def get_player(self, side):
-        return self.players[side]
-
-    def get_ball(self, color):
-        return self.ball_1 if color == 0 else self.ball_2
-
-    def get_score(self):
-        return self.score
-
-    def is_running(self):
-        return self.running
-
-    def stop(self):
-        self.running = False
-
-    def moveUp(self, player):
-        self.players[player].moveUp()
-
-    def moveDown(self, player):
-        self.players[player].moveDown()
-
-    def movements(self):
-        for ball in [self.ball_1, self.ball_2]:
-            ball.update()
-            pos = ball.get_pos()
-            if pos[Y]<0 or pos[Y]>SIZE[Y]:
-                ball.bounce(Y)
-            if pos[X]>SIZE[X]:
-                self.score[LEFT_PLAYER] += 1
-                ball.bounce(X)
-            elif pos[X]<0:
-                self.score[RIGHT_PLAYER] += 1
-                ball.bounce(X)
-
-
-    def __str__(self):
-        return f"G<{self.players[RIGHT_PLAYER]}:{self.players[LEFT_PLAYER]}:{self.ball}>"
 
 class Game():
     def __init__(self, manager):
@@ -189,11 +150,10 @@ class Game():
         
         
         #No comprobado
-    def ball_collide(self, player):
+    def ball_collide(self, player,ball,ball_id):
         self.lock.acquire()
-        ball = self.ball[0]
         ball.collide_player(player)
-        self.ball[0] = ball
+        self.ball[id] = ball
         self.lock.release()
 
     def get_info(self):
@@ -205,22 +165,38 @@ class Game():
             'is_running': self.running.value == 1
         }
         return info
+    
+    
+    def movements(self):
+        for ball in [self.ball_1, self.ball_2]:
+            ball.update()
+            pos = ball.get_pos()
+            if pos[Y]<0 or pos[Y]>SIZE[Y]:
+                ball.bounce(Y)
+            if pos[X]>SIZE[X]:
+                self.score[LEFT_PLAYER] += 1
+                ball.bounce(X)
+            elif pos[X]<0:
+                self.score[RIGHT_PLAYER] += 1
+                ball.bounce(X)
+
 
     def move_ball(self):
-        self.lock.acquire()
-        ball = self.ball[0]
-        ball.update()
-        pos = ball.get_pos()
-        if pos[Y]<0 or pos[Y]>SIZE[Y]:
-            ball.bounce(Y)
-        if pos[X]>SIZE[X]:
-            self.score[LEFT_PLAYER] += 1
-            ball.bounce(X)
-        elif pos[X]<0:
-            self.score[RIGHT_PLAYER] += 1
-            ball.bounce(X)
-        self.ball[0]=ball
-        self.lock.release()
+        for i in range(2):
+            self.lock.acquire()
+            ball = self.ball[i]
+            ball.update()
+            pos = ball.get_pos()
+            if pos[Y]<0 or pos[Y]>SIZE[Y]:
+                ball.bounce(Y)
+            if pos[X]>SIZE[X]:
+                self.score[LEFT_PLAYER] += 1
+                ball.bounce(X)
+            elif pos[X]<0:
+                self.score[RIGHT_PLAYER] += 1
+                ball.bounce(X)
+            self.ball[i]=ball
+            self.lock.release()
 
 
     def __str__(self):
