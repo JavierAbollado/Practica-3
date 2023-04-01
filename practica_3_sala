@@ -149,11 +149,11 @@ class Game():
         self.lock.release()
         
         
-        #No comprobado
+        #Cambio con mas de una bola
     def ball_collide(self, player,ball,ball_id):
         self.lock.acquire()
         ball.collide_player(player)
-        self.ball[id] = ball
+        self.ball[ball_id] = ball
         self.lock.release()
 
     def get_info(self):
