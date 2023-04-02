@@ -1,0 +1,308 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Apr  2 20:14:46 2023
+
+@author: davidp
+"""
+
+# colores
+BLACK = (0, 0, 0)
+GREY = (50,50,50)
+WHITE = (255, 255, 255)
+RED = (255, 0, 0)
+BLUE = (0, 0, 255)
+YELLOW = (255,255,0)
+GREEN = (0,255,0)
+
+BLUE_1 = (0, 50, 255)
+BLUE_2 = (0, 0, 75)
+RED_1 = (255, 0, 0)
+RED_2 = (120, 0, 0)
+
+COLORS_BLOCK = [[RED_1, RED_2], [BLUE_1, BLUE_2]]
+PLAYER_COLOR = [RED, BLUE]
+
+# ejes
+X = 0
+Y = 1
+SIZE = (700, 525)
+
+# player 
+PLAYER_1 = 0
+PLAYER_2 = 1
+PLAYER_SIZE = (15,70)
+
+# ball & block
+BALL_COLOR = WHITE
+BALL_SIZE = 12
+BLOCK_SIZE = (25,50)
+FPS = 60
+DELTA = 5 #30
+VEL_BALL_X, VEL_BALL_Y = 2, 3 # velocidad de la bola
+
+SIDES = ["left", "right"]
+
+# images
+# load_image = lambda file_name, size : pygame.transform.scale(pygame.image.load(os.path.join("images", file_name)), size)
+# load_rotate_image = lambda file_name, size, angle : pygame.transform.scale(pygame.transform.rotate(pygame.image.load(os.path.join("images", file_name)), angle), size)
+
+# IM_background = load_image("blackbackground.png", SIZE)
+# IM_gameover = load_image("gameover.png", (SIZE[0]//2, SIZE[1]//5))
+# IM_block = [[load_image(f"rojo{i+1}.png", (10*BLOCK_SIZE[0]//8, 10*BLOCK_SIZE[1]//8)) for i in range(4)], 
+#                     [load_image(f"azul{i+1}.png", (10*BLOCK_SIZE[0]//8, 10*BLOCK_SIZE[1]//8)) for i in range(4)]]
+# IM_player = [load_rotate_image(name, PLAYER_SIZE, 270) for name in ["paleta_roja.png", "paleta_azul.png"]]
+
+
+from multiprocessing.connection import Listener
+from multiprocessing import Process, Manager, Value, Lock
+import traceback
+import sys
+
+class Player():
+    def __init__(self, side):
+        self.side = side
+        if side == PLAYER_1:
+            self.pos = [10, SIZE[Y]//4]
+        else:
+            self.pos = [10, 3*SIZE[Y]//4]
+
+    def get_pos(self):
+        return self.pos
+
+    def get_side(self):
+        return self.side
+
+    def moveDown(self):
+        self.pos[Y] += DELTA
+        if self.pos[Y] > SIZE[Y]:
+            self.pos[Y] = SIZE[Y]
+
+    def moveUp(self):
+        self.pos[Y] -= DELTA
+        if self.pos[Y] < 0:
+            self.pos[Y] = 0
+
+    def __str__(self):
+        return f"P<{SIDES[self.side], self.pos}>"
+
+class Ball():
+    def __init__(self, velocity, color):  # color € {0,1} -> rojo y azul
+        self.color = color
+        self.pos=[ SIZE[X]//2, SIZE[Y]//2 ]
+        self.velocity = velocity
+        self.alive = True 
+        # Probablemente esto deberia llegar en mensaje
+
+    def get_pos(self):
+        return self.pos
+
+    # Probablemente esto deberia llegar en mensaje
+    def kill(self):
+        self.alive = False
+
+    def update(self):
+        self.pos[X] += self.velocity[X]
+        self.pos[Y] += self.velocity[Y]
+
+    def bounce(self, AXIS):
+        self.velocity[AXIS] = -self.velocity[AXIS]
+
+    # Reutilizable como collide block??
+    def collide_player(self, AXIS=X):
+        self.bounce(AXIS)
+        for i in range(3):
+            self.update()
+
+    def __str__(self):
+        return f"B<{self.pos}>"
+
+
+class Game():
+    def __init__(self, manager):
+        self.players_s = manager.list([Player(i) for i in range(2)])
+        # Linea original main
+        self.players = [Player(i) for i in range(2)]
+
+        # Lineas originiales main
+        self.ball_1 = Ball([-1*VEL_BALL_X, VEL_BALL_Y], color=0)
+        self.ball_2 = Ball([VEL_BALL_X, VEL_BALL_Y], color=1)
+        
+        self.ball_s = manager.list([Ball([-1*VEL_BALL_X, VEL_BALL_Y], color=0),
+                       Ball([VEL_BALL_X, VEL_BALL_Y], color=1)])
+        
+        # Linea original main
+        self.score = [0,0]
+        self.score_s = manager.list([0,0])
+
+        # Linea original main
+        self.running = True
+        #  1 <-> True; 0 <-> False
+        self.running_s = Value('i', 1)
+        self.lock = Lock()
+
+    # OK
+    def get_player(self, side):
+        return self.players_s[side]
+
+    # OK
+    def get_ball(self, color): 
+        # Linea editada 
+        return self.ball_s[0] if color == 0 else self.ball_s[1]
+
+    def get_score(self):
+        return list(self.score_s)
+
+    # OK <-> stop()
+    def game_over(self):
+        self.running.value = 0
+
+    # OK
+    def is_running(self):
+        return self.running.value == 1
+
+    # OK
+    def moveUp(self, player):
+        self.lock.acquire()
+        
+        p = self.players_s[player]
+        p.moveUp()
+        self.players_s[player] = p
+        # Linea original main
+        # self.players[player].moveUp()
+        
+        self.lock.release()
+
+    def moveDown(self, player):
+        self.lock.acquire()
+        p = self.players_s[player]
+        p.moveDown()
+        self.players_s[player] = p
+        
+        # Linea original main
+        # self.players[player].moveDown()
+        self.lock.release()
+        
+    
+    # Queda el equivalente a ball_colide(self, player)
+    # OK
+    def ball_collide(self, player, ball_index):
+        self.lock.acquire()
+        ball = self.ball_s[ball_index]
+        ball.collide_player(player)
+        self.ball[ball_index] = ball
+        self.lock.release()
+
+    # OK
+    def movements(self):
+        self.lock.acquire()
+        # Lineas originales de main
+        # for ball in [self.ball_1, self.ball_2]:
+        #     ball.update()
+        #     pos = ball.get_pos()
+        #     if pos[Y]<0 or pos[Y]>SIZE[Y]:
+        #         ball.bounce(Y)
+        #     if pos[X]>SIZE[X]:
+        #         ball.bounce(X)
+        #     elif pos[X]<0:
+        #         ball.kill()
+
+        for index, b in enumerate(list(self.ball_s)):
+            ball = self.ball_s[index]
+            ball.update()
+            pos = ball.get_pos()
+            if pos[Y]<0 or pos[Y]>SIZE[Y]:
+                ball.bounce(Y)
+            if pos[X]>SIZE[X]:
+                ball.bounce(X)
+            elif pos[X]<0:
+                ball.kill()
+            self.ball_s[index] = ball
+                
+        self.lock.release()
+
+    # OK, revisar si falta mas informacion
+    def get_info(self):
+        info = {
+            'pos_left_player': self.players_s[0].get_pos(),
+            'pos_right_player': self.players_s[1].get_pos(),
+            'pos_ball_0': self.ball_s[0].get_pos(),
+            'pos_ball_1': self.ball_s[1].get_pos(),
+            'score': list(self.score_s),
+            'is_running': self.running.value == 1
+        }
+        return info
+
+    def __str__(self):
+        return f"G<{self.players[PLAYER_2]}:{self.players[PLAYER_1]}:{self.ball}>"
+
+# OK
+# Revisar si faltan comandos
+def player(side, conn, game):
+    try:
+        # print(f"starting player {SIDESSTR[side]}:{game.get_info()}")
+        conn.send( (side, game.get_info()) )
+        while game.is_running():
+            command = ""
+            while command != "next":
+                command = conn.recv()
+                if command == "up":
+                    game.moveUp(side)
+                elif command == "down":
+                    game.moveDown(side)
+                elif command == "collide":
+                    game.ball_collide(side)
+                elif command == "quit":
+                    game.game_over()
+            if side == 1:
+                game.move_ball()
+            conn.send(game.get_info())
+    except:
+        traceback.print_exc()
+        conn.close()
+    finally:
+        print(f"Game ended {game}")
+
+# QUASI OK
+# Seguramente falten adiciones
+def main(ip_address):
+    manager = Manager()
+    # Lineas origianles main
+    # try:
+    #     game = Game()
+    #     display = Display(game)
+
+    #     while not display.quit:
+    #         game.movements()
+    #         display.analyze_events()
+    #         display.refresh()
+    #         display.tick()
+    # finally:
+    #     pygame.quit()
+    try:
+        with Listener((ip_address, 6000),
+                      authkey=b'secret password') as listener:
+            n_player = 0
+            players = [None, None]
+            game = Game(manager)
+            while True:
+                print(f"accepting connection {n_player}")
+                conn = listener.accept()
+                players[n_player] = Process(target=player,
+                                            args=(n_player, conn, game))
+                n_player += 1
+                if n_player == 2:
+                    players[0].start()
+                    players[1].start()
+                    n_player = 0
+                    players = [None, None]
+                    game = Game(manager)
+
+    except Exception as e:
+        traceback.print_exc()
+if __name__=="__main__":
+    ip_address = "127.0.0.1"
+    if len(sys.argv)>1:
+        ip_address = sys.argv[1]
+
+    main(ip_address)
