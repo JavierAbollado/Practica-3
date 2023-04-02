@@ -91,7 +91,7 @@ class Block(pygame.sprite.Sprite):
         super().__init__()
         self.pos = pos
         self.color = color if color != None else random.randint(0,1) # 2 colores € {0,1}
-        self.level = level if level != None else random.randint(0,0) # X niveles € {0,1,...}
+        self.level = level if level != None else random.randint(0,3) # X niveles € {0,1,...}
         self.image = pygame.Surface(BLOCK_SIZE)
         self.image.fill(BLACK)
         self.image.blit(IM_block[self.color][self.level], (0.1*BLOCK_SIZE[0], 0.1*BLOCK_SIZE[1]))
