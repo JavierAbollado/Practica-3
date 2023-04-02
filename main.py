@@ -2,8 +2,61 @@ import pygame
 import socket
 import pickle
 import random
+import os
 
-from constantes import *
+# from constantes import *
+
+# teclas para mover las barras: {s,x} y {k,m}.
+
+# Me he puesto constantes en main para que no me de todo los warnings spyder
+# Cuando este todo solucionado vuelvo a separarlo
+
+# colores
+BLACK = (0, 0, 0)
+GREY = (50,50,50)
+WHITE = (255, 255, 255)
+RED = (255, 0, 0)
+BLUE = (0, 0, 255)
+YELLOW = (255,255,0)
+GREEN = (0,255,0)
+
+BLUE_1 = (0, 50, 255)
+BLUE_2 = (0, 0, 75)
+RED_1 = (255, 0, 0)
+RED_2 = (120, 0, 0)
+
+COLORS_BLOCK = [[RED_1, RED_2], [BLUE_1, BLUE_2]]
+PLAYER_COLOR = [RED, BLUE]
+
+# ejes
+X = 0
+Y = 1
+SIZE = (700, 525)
+
+# player 
+PLAYER_1 = 0
+PLAYER_2 = 1
+PLAYER_SIZE = (15,70)
+
+# ball & block
+BALL_COLOR = WHITE
+BALL_SIZE = 12
+BLOCK_SIZE = (25,50)
+FPS = 60
+DELTA = 5 #30
+VEL_BALL_X, VEL_BALL_Y = 2, 3 # velocidad de la bola
+
+SIDES = ["left", "right"]
+
+# images
+load_image = lambda file_name, size : pygame.transform.scale(pygame.image.load(os.path.join("images", file_name)), size)
+load_rotate_image = lambda file_name, size, angle : pygame.transform.scale(pygame.transform.rotate(pygame.image.load(os.path.join("images", file_name)), angle), size)
+
+IM_background = load_image("blackbackground.png", SIZE)
+IM_gameover = load_image("gameover.png", (SIZE[0]//2, SIZE[1]//5))
+IM_block = [[load_image(f"rojo{i+1}.png", (10*BLOCK_SIZE[0]//8, 10*BLOCK_SIZE[1]//8)) for i in range(4)], 
+                    [load_image(f"azul{i+1}.png", (10*BLOCK_SIZE[0]//8, 10*BLOCK_SIZE[1]//8)) for i in range(4)]]
+IM_player = [load_rotate_image(name, PLAYER_SIZE, 270) for name in ["paleta_roja.png", "paleta_azul.png"]]
 
 class Player():
     def __init__(self, side):
@@ -19,43 +72,58 @@ class Player():
     def get_side(self):
         return self.side
 
-    def moveDown(self):
-        self.pos[Y] += DELTA
-        if self.pos[Y] > SIZE[Y]:
-            self.pos[Y] = SIZE[Y]
+    def set_pos(self, pos):
+        self.pos = pos
+# Esto se gestion en sala
+    # def moveDown(self):
+    #     self.pos[Y] += DELTA
+    #     if self.pos[Y] > SIZE[Y]:
+    #         self.pos[Y] = SIZE[Y]
 
-    def moveUp(self):
-        self.pos[Y] -= DELTA
-        if self.pos[Y] < 0:
-            self.pos[Y] = 0
+    # def moveUp(self):
+    #     self.pos[Y] -= DELTA
+    #     if self.pos[Y] < 0:
+    #         self.pos[Y] = 0
 
     def __str__(self):
         return f"P<{SIDES[self.side], self.pos}>"
 
+# La informacion deberia venir de sala
+# Pero deberia haber una instancia local de la informacio i.e color
 class Ball():
-    def __init__(self, velocity, color):  # color € {0,1} -> rojo y azul
-        self.color = color
+    # Velocity, Color, Alive  son  serverSide
+    def __init__(self, color):  # color € {0,1} -> rojo y azul
         self.pos=[ SIZE[X]//2, SIZE[Y]//2 ]
-        self.velocity = velocity
-        self.alive = True
+        # Lineas originales de main
+        self.color = color
+        # self.velocity = velocity
+        # self.alive = True
+        
+        # REVISAR SI NO HAY QUE INICIALIZARLO
 
     def get_pos(self):
         return self.pos
     
-    def kill(self):
-        self.alive = False
+    def set_pos(self, pos):
+        self.pos = pos
 
-    def update(self):
-        self.pos[X] += self.velocity[X]
-        self.pos[Y] += self.velocity[Y]
+    # Lineas originales de main
+    # Son operaciones de sala
+    
+    # def kill(self):
+    #     self.alive = False
 
-    def bounce(self, AXIS):
-        self.velocity[AXIS] = -self.velocity[AXIS]
+    # def update(self):
+    #     self.pos[X] += self.velocity[X]
+    #     self.pos[Y] += self.velocity[Y]
 
-    def collide_player(self, AXIS=X):
-        self.bounce(AXIS)
-        for i in range(3):
-            self.update()
+    # def bounce(self, AXIS):
+    #     self.velocity[AXIS] = -self.velocity[AXIS]
+
+    # def collide_player(self, AXIS=X):
+    #     self.bounce(AXIS)
+    #     for i in range(3):
+    #         self.update()
 
     def __str__(self):
         return f"B<{self.pos}>"
@@ -72,11 +140,22 @@ class Game():
     def get_player(self, side):
         return self.players[side]
 
+
+    def set_pos_player(self, side, pos):
+        self.players[side].set_pos(pos)
+
     def get_ball(self, color):
         return self.ball_1 if color == 0 else self.ball_2
 
+    def set_ball_pos(self, pos):
+        self.ball.set_pos(pos)
+
+    # Legacy
     def get_score(self):
         return self.score
+    # Legacy
+    def set_score(self, score):
+        self.score = score
 
     def game_over(self):
         self.running = False
@@ -84,32 +163,48 @@ class Game():
     def is_running(self):
         return self.running
 
+    # Legacy
     def stop(self):
         self.running = False
 
-    def moveUp(self, player):
-        self.players[player].moveUp()
+    # Lo hace sala
+    # def moveUp(self, player):
+    #     self.players[player].moveUp()
 
-    def moveDown(self, player):
-        self.players[player].moveDown()
+    # Lo hace sala
+    # def moveDown(self, player):
+    #     self.players[player].moveDown()
 
-    def movements(self):
-        for ball in [self.ball_1, self.ball_2]:
-            ball.update()
-            pos = ball.get_pos()
-            if pos[Y]<0 or pos[Y]>SIZE[Y]:
-                ball.bounce(Y)
-            if pos[X]>SIZE[X]:
-                ball.bounce(X)
-            elif pos[X]<0:
-                ball.kill()
+    # Lo hace sala
+    # def movements(self):
+    #     for ball in [self.ball_1, self.ball_2]:
+    #         ball.update()
+    #         pos = ball.get_pos()
+    #         if pos[Y]<0 or pos[Y]>SIZE[Y]:
+    #             ball.bounce(Y)
+    #         if pos[X]>SIZE[X]:
+    #             ball.bounce(X)
+    #         elif pos[X]<0:
+    #             ball.kill()
 
-
+    # Documentar formato de game_info
+    # Actualiza el display con la informacion de sala
+    def update(self, gameinfo):
+        self.set_pos_player(0, gameinfo['pos_left_player'])
+        self.set_pos_player(1, gameinfo['pos_right_player'])
+        self.set_ball_pos(gameinfo['pos_ball'])
+        self.set_score(gameinfo['score'])
+        self.running = gameinfo['is_running']
+        
+        
+        
     def __str__(self):
         return f"G<{self.players[PLAYER_2]}:{self.players[PLAYER_1]}:{self.ball}>"
 
 
+# OK
 class Paddle(pygame.sprite.Sprite):
+    # OK
     def __init__(self, player):
         super().__init__()
         self.player = player
@@ -117,16 +212,18 @@ class Paddle(pygame.sprite.Sprite):
         self.image = IM_player[self.color]
         self.rect = self.image.get_rect()
         self.update()
-
+    # OK
     def update(self):
         pos = self.player.get_pos()
         self.rect.centerx, self.rect.centery = pos
-
+    # OK
     def __str__(self):
         return f"S<{self.player}>"
 
 
+# Revisar
 class BallSprite(pygame.sprite.Sprite):
+    # OK
     def __init__(self, ball):
         super().__init__()
         self.ball = ball
@@ -136,18 +233,22 @@ class BallSprite(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.update()
 
+    # Deberia ir dentro de update??
     def change_color(self): # {0,1} -> {1,0}
         self.ball.color = 1 - self.ball.color
 
+    # OK
     def update(self):
         if not self.ball.alive:
             self.kill()
         color = RED if self.ball.color == 0 else BLUE
-        pygame.draw.circle(self.image, color, (BALL_SIZE//2, BALL_SIZE//2), BALL_SIZE//2)
+        # Esta linea deberia ir en __init__, no queremos dibujos en update
+        pygame.draw.circle(self.image, color, (BALL_SIZE//2, BALL_SIZE//2), 
+                           BALL_SIZE//2)
         pos = self.ball.get_pos()
         self.rect.centerx, self.rect.centery = pos
 
-
+# Revisar
 class Block(pygame.sprite.Sprite):    
     def __init__(self, pos, color=None, level=None):  # color € {0,1} -> rojo y azul
         super().__init__()
@@ -156,7 +257,8 @@ class Block(pygame.sprite.Sprite):
         self.level = level if level != None else random.randint(0,3) # X niveles € {0,1,...}
         self.image = pygame.Surface(BLOCK_SIZE)
         self.image.fill(BLACK)
-        self.image.blit(IM_block[self.color][self.level], (0.1*BLOCK_SIZE[0], 0.1*BLOCK_SIZE[1]))
+        self.image.blit(IM_block[self.color][self.level], (0.1*BLOCK_SIZE[0],
+                                                           0.1*BLOCK_SIZE[1]))
         self.rect = self.image.get_rect()
         self.rect.left, self.rect.top = pos
         self.update()
@@ -166,11 +268,15 @@ class Block(pygame.sprite.Sprite):
             self.kill()
         else:
             self.level -= 1
-        self.image.blit(IM_block[self.color][self.level], (0.1*BLOCK_SIZE[0], 0.1*BLOCK_SIZE[1]))
+        self.image.blit(IM_block[self.color][self.level], (0.1*BLOCK_SIZE[0],
+                                                           0.1*BLOCK_SIZE[1]))
 
+    # Update <-> get_shot en este caso?
+    # Mirar si hay dibujos en get_shot
     def update(self):
         pass
 
+# OK, metodo a llamar cuando self.running == 0
 class GameOver(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
@@ -181,7 +287,7 @@ class GameOver(pygame.sprite.Sprite):
         screen.blit(self.image, self.rect)
 
 
-
+# Construye la pantalla con la informacion que recibe
 class Display():
     def __init__(self, game):
 
@@ -203,7 +309,8 @@ class Display():
         while 0.75*SIZE[0] + (j+1)*BLOCK_SIZE[0] < 0.9*SIZE[0]:
             i = 0
             while 0.1*SIZE[1] + (i+1)*BLOCK_SIZE[1] < 0.9*SIZE[1]:
-                block = Block((0.75*SIZE[0] + j*BLOCK_SIZE[0], 0.1*SIZE[1] + i*BLOCK_SIZE[1]))
+                block = Block((0.75*SIZE[0] + j*BLOCK_SIZE[0], 0.1*SIZE[1] +\
+                               i*BLOCK_SIZE[1]))
                 self.blocks.add(block)
                 i += 1
             j += 1
@@ -219,6 +326,8 @@ class Display():
         self.clock =  pygame.time.Clock()  #FPS
         pygame.init()
 
+    # Todas las operaciones que hace esto deberian estar en sala, copio funcion
+    # LEGACY
     def analyze_events(self):
 
         # comprobar salir del juego
@@ -245,24 +354,87 @@ class Display():
             self.game.moveDown(PLAYER_2)
         
         # colisiones BOLA - PALA
-        for ball, paddles in pygame.sprite.groupcollide(self.balls, self.paddles, False, False).items():
+        for ball, paddles in pygame.sprite.groupcollide(self.balls,
+                                                        self.paddles,
+                                                        False,
+                                                        False).items():
             paddle = paddles[0]
             if ball.ball.color != paddle.color:
                 ball.change_color()
             ball.ball.collide_player()
         
-        # colisiones BOLA - PALA
-        for ball, blocks in pygame.sprite.groupcollide(self.balls, self.blocks, False, False).items():
+        # colisiones BOLA - Bloque
+        for ball, blocks in pygame.sprite.groupcollide(self.balls,
+                                                       self.blocks,
+                                                       False,
+                                                       False).items():
             block = blocks[0]
             if ball.ball.color == block.color:
                 block.get_shot()
-            AXIS = Y if ((abs(block.rect.top - ball.rect.bottom) < block.rect.width*0.1)
-                            or (abs(block.rect.bottom - ball.rect.top) < block.rect.width*0.1)) else X
+            AXIS = Y if ((abs(block.rect.top - ball.rect.bottom) <\
+                          block.rect.width*0.1)
+                            or (abs(block.rect.bottom - ball.rect.top) <\
+                                block.rect.width*0.1)) else X
             ball.ball.collide_player(AXIS)
         if len(self.balls) == 0:
             self.game.game_over()
         self.all_sprites.update()
+        
+    # *** SIN TERMINAR ***
+    # NOT OK
+    def analyze_events_s(self):
 
+        # comprobar salir del juego
+        events = []
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                events.append("quit")
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_q: # quit
+                    events.append("quit")
+
+        # mover palas
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_s]:
+            events.append("up")
+        if keys[pygame.K_x]:
+            events.append("down")
+
+        
+        # ANADIR INDEX DE LAS KEYS DEL DICCIONARIO DEl COLLIDE
+        # colisiones BOLA - PALA
+        for ball, paddles in pygame.sprite.groupcollide(self.balls,
+                                                        self.paddles,
+                                                        False,
+                                                        False).items():
+            paddle = paddles[0]
+            if ball.ball.color != paddle.color:
+                # Modificar para indicar bola y color
+                events.append("cambiar color")
+            # Modificar para indicar que bola con que pala
+            events.append("collide_bola_p")
+        
+        # colisiones BOLA - BLOQUE
+        for ball, blocks in pygame.sprite.groupcollide(self.balls,
+                                                       self.blocks,
+                                                       False,
+                                                       False).items():
+            block = blocks[0]
+            if ball.ball.color == block.color:
+                events.append("bloque_golpeado")
+            AXIS = Y if ((abs(block.rect.top - ball.rect.bottom) <\
+                          block.rect.width*0.1)
+                            or (abs(block.rect.bottom - ball.rect.top) <\
+                                block.rect.width*0.1)) else X
+            
+            events.append("collision_bola_bloq")
+    
+        # Esto deberia hacerlo sala??
+        if len(self.balls) == 0:
+            self.game.game_over()
+        self.all_sprites.update()
+
+    # OK, representacion local
     def refresh(self):
         if not self.game.is_running():
             self.gameover.draw(self.screen)
@@ -270,38 +442,20 @@ class Display():
             self.screen.blit(IM_background, (0, 0))
             self.all_sprites.draw(self.screen)
         pygame.display.flip()
-
+    # OK
     def tick(self):
         self.clock.tick(FPS)
 
+    # OK
     @staticmethod
     def quit():
         pygame.quit()
 
-class Network:
-    def __init__(self): ##this will connect to the server initially
-        self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server = '127.0.0.1' #server ip #<---
-        self.port = 5555   #server port #<---
-        self.addr = (self.server, self.port)
-        self.p = self.connect()
-    def getP(self):
-        return self.p
-    def connect(self):
-        try:
-            self.client.connect(self.addr)
-            return pickle.loads(self.client.recv(2048))
-        except:
-            pass
-    def send(self, data):
-        try:
-            self.client.send(pickle.dumps(data))
-            return pickle.loads(self.client.recv(2048))
-        except socket.error as e:
-            print(e)
+# Anadir conexion
+# Anadir sistema de update de game en funcion de la informacion de sala
 
-
-def main():
+# NOT OK
+def main(ip_address):
     try:
         game = Game()
         display = Display(game)
