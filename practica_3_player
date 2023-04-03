@@ -280,7 +280,6 @@ class Display():
                 events.append("quit")
         if pygame.sprite.collide_rect(self.ball, self.paddles[side]):
             events.append("collide")
-        return events
 
         
         # colisiones BOLA - PALA
