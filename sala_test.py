@@ -309,7 +309,7 @@ def player(side, conn, game):
                 # Comandos colision bola-bloque
                 # Color va implicito en side
                 # collide_b_b_X_Y_Z
-                # X: jugador(side) Y: ball_index : block_index
+                # X: jugador(side) Y: ball_index , Z : block_index
                 # OBS: Y tiene dos cifras, 01,...12
                 # Supongamos la existencia de una constante inicial NBLOQUES
                 NBLOQUES = 12 #MOVER A GLOBAL
@@ -320,7 +320,7 @@ def player(side, conn, game):
                     side = partida[-3]
                     ball_index = partida[-2]
                     block_index = partida[-1]
-                    if command == "collide_p_b_" + termination:
+                    if command == "collide_b_b_" + termination:
                         # Bien def block collide? Creo que si
                         game.ball_collide(side, ball_index)
                         # Anadir una funcion que mande restar una vida al
