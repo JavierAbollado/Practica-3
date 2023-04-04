@@ -43,8 +43,9 @@ BLOCK_SIZE = (55,25) # (25,55)
 
 
 # images
-load_image = lambda file_name, size : pygame.transform.scale(pygame.image.load(os.path.join("../../images", file_name)), size)
-load_rotate_image = lambda file_name, size, angle : pygame.transform.scale(pygame.transform.rotate(pygame.image.load(os.path.join("../../images", file_name)), angle), size)
+image_path = "images"
+load_image = lambda file_name, size : pygame.transform.scale(pygame.image.load(os.path.join(image_path, file_name)), size)
+load_rotate_image = lambda file_name, size, angle : pygame.transform.scale(pygame.transform.rotate(pygame.image.load(os.path.join(image_path, file_name)), angle), size)
 
 IM_background = load_image("background.jpg", SIZE)
 IM_gameover = load_image("gameover.png", (SIZE[0]//2, SIZE[1]//7))
