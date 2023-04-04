@@ -1,8 +1,7 @@
 
-
 """
-creo que queda mirar bien tema kill() y ya
-
+    problema como hacer para que se actualice
+    el color de las pelotas con el diccionario
 """
 
 from multiprocessing.connection import Client
@@ -49,21 +48,27 @@ VEL_BALL_X, VEL_BALL_Y = 2, 3 # velocidad de la bola
 SIDES = ["left", "right"]
 
 
+
+
+
+
 SIDESSTR = ["left", "right"]
 
 class Player():
     # side € {0, 1}
     def __init__(self, side: int):
         self.side = side
-        self.pos = [None, None]
+        self.pos  = [0,0]
+        # self.pos = [None, None]
+        # DEBUGGING
 
     def get_pos(self):
         return self.pos
 
-    def get_side(self):
+    def get_side(self) -> int:
         return self.side
 
-    def set_pos(self, pos):
+    def set_pos(self, pos: list):
         self.pos = pos
 
     def __str__(self):
@@ -71,25 +76,30 @@ class Player():
 
 class Ball():
     def __init__(self, ball_id: int, color: int):
-        self.pos=[ None, None ]
+        # self.pos=[ None, None ]
+        # DEBUGGING
+        self.pos     = [SIZE[0]//2, SIZE[1]//2]
         self.color   = color
         self.ball_id = ball_id
-        self.status = 1
+        self.alive   = 1
 
     def get_pos(self):
         return self.pos
-    
-    def set_status(self, status):
-        self.status = status
 
-    def set_pos(self, pos):
+    def set_pos(self, pos: list):
         self.pos = pos
         
-    def get_color(self):
+    def get_color(self) -> int:
         return self.color
 
-    def set_color(self, color):
+    def set_color(self, color: int):
         self.color = color
+    
+    def get_status(self) -> int:
+        return self.alive
+
+    def set_status(self, status: int):
+        self.alive = status%2
 
     def __str__(self):
         return f"B<{self.pos}>"
@@ -101,19 +111,16 @@ class Block():
         # DEBUGGING
         self.pos      = [0,0]
         self.color    = color
-        self.vida    = 1
         self.block_id = block_id
+        self.vidas    = 2
 
-    def get_pos(self):
+    def get_pos(self) :
         return self.pos
 
-    def set_pos(self, pos):
+    def set_pos(self, pos: list):
         self.pos = pos
         
-    def set_vida(self, vida):
-        self.vida = vida
-        
-    def get_color(self):
+    def get_color(self) -> int:
         return self.color
 
     def set_color(self, color: int):
@@ -134,32 +141,45 @@ class Game():
     def get_player(self, side: int):
         return self.players[side]
 
-    def set_pos_player(self, side: int, pos):
+    def set_pos_player(self, side: int, pos: list):
         self.players[side].set_pos(pos)
         
+    # ????? vvvv
+    def get_balls_id(self):
+        return self.balls_list
+    # new_balls_id es una lsita o uno solo??
+    def set_balls_id(self, new_balls_id):
+         self.balls_id = new_balls_id
+    
+    # ????? ^^^^
 
-    def get_ball(self,ball_id):
+    # Cambio propuesto
+    def get_balls_id_debugging(self):
+        return [self.balls[i].ball_id for i  in range(2)]
+    def set_balls_id_debugging(self, new_id_list: list):
+        for i  in range(2):
+            self.balls[i].ball_id = new_id_list[i]
+    # Fin cambio propuesto
+
+    def get_ball(self, ball_id: int) -> int:
         return self.balls[ball_id]
 
     
-    def get_block(self, block_id: int):
+    def get_block(self, block_id: int) -> int:
         return self.blocks[block_id]
-    
-    def set_block_vida(self, block_id: int, vida):
-        self.blocks[block_id].set_vida(vida)
 
-    def set_ball_pos(self, ball_id: int, pos):
+    def set_ball_pos(self, ball_id: int, pos: list):
         self.balls[ball_id].set_pos(pos)
 
-    def get_score(self):
+    def get_score(self) -> list:
         return self.score
 
-    def set_score(self, score):
+    def set_score(self, score: list):
         self.score = score
 
 
     def update(self, gameinfo):
-        self.set_balls_id()
+        # self.set_balls_id()
         self.set_pos_player(LEFT_PLAYER, gameinfo['pos_left_player'])
         self.set_pos_player(RIGHT_PLAYER, gameinfo['pos_right_player'])
         self.set_score(gameinfo['score'])
@@ -167,21 +187,18 @@ class Game():
         self.balls_dict=(gameinfo['balls_dict'])
         for i in range(2):
 
+            # Resolver vvv
+            # self.set_pos_color
+            # Resolver ^^^
+
             # Solucion:
             # Nueva posicion bolas
             self.balls[i].set_pos(self.balls_dict[i][2])
-            self.balls[i].set_status(self.balls_dict[i][0])
             # Color bolas, si hay que hacer cambio (val = 1)
             # Alternamos el color
             if self.balls_dict[i][1] == 1:
                 self.balls[i].set_color((1-self.balls[i].get_color())%2)
         self.bloques_dict=(gameinfo['bloques_dict'])
-        for i in range(12):
-
-            self.blocks[i].set_vida(self.blocks_dict[i][0])
-            self.blocks[i].set_color(self.blocks_dict[i][1])
-            
-            
         
 
     def is_running(self):
@@ -217,10 +234,11 @@ class Paddle(pygame.sprite.Sprite):
 class BallSprite(pygame.sprite.Sprite):
     def __init__(self, ball):
         super().__init__()
-        self.ball = ball
-        self.ball_id=ball.ball_id
-        self.color=ball.color
-        self.image = pygame.Surface((BALL_SIZE, BALL_SIZE))
+        self.ball    = ball
+        self.ball_id = ball.ball_id
+        self.color   = ball.color
+        self.pos     = ball.pos
+        self.image   = pygame.Surface((BALL_SIZE, BALL_SIZE))
         self.image.fill(BLACK)
         self.image.set_colorkey(BLACK)
         pygame.draw.rect(self.image, self.color, [0, 0, BALL_SIZE, BALL_SIZE])
@@ -228,13 +246,13 @@ class BallSprite(pygame.sprite.Sprite):
         self.update()
 
     def update(self):
-        if self.ball.status==0:
+        if self.ball.alive == 0:
             self.kill()
-        else:
-            color = RED if self.ball.color == 0 else BLUE
-            pygame.draw.circle(self.image, color, (BALL_SIZE//2, BALL_SIZE//2), BALL_SIZE//2)
-            pos = self.ball.get_pos()
-            self.rect.centerx, self.rect.centery = pos
+        color = RED if self.ball.color == 0 else BLUE
+        pygame.draw.circle(self.image, color, (BALL_SIZE//2, BALL_SIZE//2), BALL_SIZE//2)
+        pos = self.ball.get_pos()
+        self.rect.centerx, self.rect.centery = [0,0] #DEBUG!!!!!
+        # cambiar lo de arriba por self.pos o una variante
         
         
         
@@ -243,8 +261,9 @@ class BlockSprite(pygame.sprite.Sprite):
         super().__init__()
         self.block=block
         self.color=block.color
+        self.lives=block.vidas
         self.pos = block.pos
-        self.image = pygame.Surface(BLOCK_SIZE)
+        self.image = pygame.Surface((BLOCK_SIZE,BLOCK_SIZE))
         self.image.fill(BLACK)
         pygame.draw.rect(self.image, self.color, [0, 0, BALL_SIZE, BALL_SIZE])
         self.rect = self.image.get_rect()
@@ -254,11 +273,8 @@ class BlockSprite(pygame.sprite.Sprite):
    
 
     def update(self):
-        if self.block.lives == 0:
+        if self.lives == 0:
             self.kill()
-        
-        pass
-
 
 
 class Display():
@@ -381,4 +397,3 @@ if __name__=="__main__":
     if len(sys.argv)>1:
         ip_address = sys.argv[1]
     main(ip_address)
-
