@@ -259,9 +259,22 @@ class Game():
     
     def change_colors_g(self, ball_index):
         self.lock.acquire()
+        # Version de si queremos guardar el color
+        # ball_c = self.ball_s[ball_index].color
+        # ball_c = (ball_c - 1)%2
+        # self.ball[ball_index] = ball_c
+        
+        # Version que solo dice que ha cambiado el color
         ball_c = self.ball_s[ball_index].color
-        ball_c = (ball_c - 1)%2
+        ball_c = 1
         self.ball[ball_index] = ball_c
+        self.lock.release()
+        
+    def colors_not_changed(self, ball_index):
+        self.lock.acquire()
+        ball_c = self.ball_s[ball_index].color
+        ball_c = 0
+        self.ball_s[ball_index].color = ball_c
         self.lock.release()
     # OK, revisar si falta mas informacion
     def get_info(self):
@@ -272,7 +285,8 @@ class Game():
             # 'pos_ball_1': self.ball_s[1].get_pos(),
             'score': list(self.score_s),
             'is_running': self.running_s.value == 1,
-            # {id_bloque: (vida, color, posicion), ..}
+            # {id_bloque: (vida, {0 -> mismo color
+            #                   , 1 -> cambio de color}, posicion), ..}
             'bloques_vivos': dict(self.block_lives),  
             # {id_bola: (status, color, posicion), ..}
             'info_bolas'   : dict(self.info_bolas)
@@ -311,7 +325,10 @@ def player(side, conn, game):
                     if command == "collide_p_b_" + termination:
                         game.ball_collide(side, ball_index)
                         # mismo color y cambiamos al opuesto
-                        game.change_colors_g(ball_index)
+                        if side == game.ball_s[ball_index].color:
+                            game.change_colors_g(ball_index)
+                        else:
+                            game.colors_not_changed(ball_index)
                 # Vamos a hacer lo mismo con los bloques
                 # Comandos colision bola-bloque
                 # Color va implicito en side
@@ -333,7 +350,10 @@ def player(side, conn, game):
                         # Anadir una funcion que mande restar una vida al
                         # indice del bloque que colisiona
                         # necesitamos el color del bloque!
-                        if game.ball_s[ball_index].color == 0:
+                        if game.ball_s[ball_index].color ==\
+                        game.block_lives[block_index][1]:
+                            # Como hay cambio de color
+                            # 
                             # modificar con el color
                             game.set_block_lives(block_index)
                             pass
