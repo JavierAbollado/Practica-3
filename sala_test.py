@@ -154,10 +154,15 @@ class Game():
         self.running_s = Value('i', 1)
         
         self.block_lives = manager.dict()
+        self.ball_info = manager.dict()
         # Cambiar esto por el numero correcto
         for i in range(12):
             # Es dos la vida inicial de un bloque?
-            self.block_lives[i] = 2
+            self.block_lives[i] = (2, i%2, (0,0))
+        
+        for i in range(len(list(self.ball_s))):
+            self.ball_info[i] = (1, i%2, 700//2, 525//2)
+            
         self.lock = Lock()
 
     # OK
@@ -263,14 +268,16 @@ class Game():
         info = {
             'pos_left_player': self.players_s[0].get_pos(),
             'pos_right_player': self.players_s[1].get_pos(),
-            'pos_ball_0': self.ball_s[0].get_pos(),
-            'pos_ball_1': self.ball_s[1].get_pos(),
+            # 'pos_ball_0': self.ball_s[0].get_pos(),
+            # 'pos_ball_1': self.ball_s[1].get_pos(),
             'score': list(self.score_s),
-            'is_running': self.running_s.value == 1, #corregido
-            # Devuelve un dic con el bloque y las vidas que le quedan
-            'bloques_vivos': dict(self.block_lives),  # Para el print
-            'color_bola_0': self.ball_s[0].get_color(),
-            'color_bola_1': self.ball_s[1].get_color()
+            'is_running': self.running_s.value == 1,
+            # {id_bloque: (vida, color, posicion), ..}
+            'bloques_vivos': dict(self.block_lives),  
+            # {id_bola: (status, color, posicion), ..}
+            'info_bolas'   : dict(self.info_bolas)
+            # 'color_bola_0': self.ball_s[0].get_color(),
+            # 'color_bola_1': self.ball_s[1].get_color()
             
         }
         return info
