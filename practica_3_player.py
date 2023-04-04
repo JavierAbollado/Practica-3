@@ -1,16 +1,9 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+
 """
-Created by juan on Sun Jul  17 10:34:56 1936
-Code by juan
-bso by juan
-idea by juan
-built by juan
-@author: juan
-this code belongs to juan and it was juan who did it
-this code made by juan is totally functional believe me trust
-true: if an statement ends in true it means that it is true
-true
+    Cuanto peor
+     mejor para todos y cuanto peor para todos mejor,
+     mejor para mí el suyo,
+     beneficio político.
 """
 
 from multiprocessing.connection import Client
@@ -55,10 +48,6 @@ DELTA = 5 #30
 VEL_BALL_X, VEL_BALL_Y = 2, 3 # velocidad de la bola
 
 SIDES = ["left", "right"]
-
-
-
-
 
 
 SIDESSTR = ["left", "right"]
@@ -158,12 +147,10 @@ class Game():
 
     def set_score(self, score):
         self.score = score
-    
-    def get_block(self, index):
-        return self.blocks[index]
+
 
     def update(self, gameinfo):
-        # self.set_balls_id()
+        self.set_balls_id()
         self.set_pos_player(LEFT_PLAYER, gameinfo['pos_left_player'])
         self.set_pos_player(RIGHT_PLAYER, gameinfo['pos_right_player'])
         self.set_ball_pos(0, gameinfo['pos_ball_0']) #Modificar para poner la otra bola
@@ -206,10 +193,12 @@ class BallSprite(pygame.sprite.Sprite):
     def __init__(self, ball):
         super().__init__()
         self.ball = ball
+        self.ball_id=ball.ball_id
+        self.color=ball.color
         self.image = pygame.Surface((BALL_SIZE, BALL_SIZE))
         self.image.fill(BLACK)
         self.image.set_colorkey(BLACK)
-        pygame.draw.rect(self.image, BALL_COLOR, [0, 0, BALL_SIZE, BALL_SIZE])
+        pygame.draw.rect(self.image, self.color, [0, 0, BALL_SIZE, BALL_SIZE])
         self.rect = self.image.get_rect()
         self.update()
 
@@ -223,9 +212,11 @@ class BlockSprite(pygame.sprite.Sprite):
     def __init__(self, block):  # color € {0,1} -> rojo y azul
         super().__init__()
         self.block=block
+        self.color=block.color
         self.pos = block.pos
-        self.image = pygame.Surface((BLOCK_SIZE, BLOCK_SIZE))
+        self.image = pygame.Surface(BLOCK_SIZE)
         self.image.fill(BLACK)
+        pygame.draw.rect(self.image, self.color, [0, 0, BALL_SIZE, BALL_SIZE])
         self.rect = self.image.get_rect()
         self.rect.left, self.rect.top = self.pos
         self.update()
@@ -238,9 +229,12 @@ class BlockSprite(pygame.sprite.Sprite):
 
 
 class Display():
-    def __init__(self, game):
+    def __init__(self, game,side):
         self.quit = False
         self.game = game
+        self.list_blocks=[i for i in range(12)]
+        self.side=side
+        self.color=side
 
         # sprite groups
         self.paddles = pygame.sprite.Group()
@@ -249,18 +243,18 @@ class Display():
         self.blocks = pygame.sprite.Group()
 
         # añadir sprites
-        # El indice suele representar los colores
         for padlle in [Paddle(self.game.get_player(i)) for i in range(2)]:
             self.paddles.add(padlle)
         
-        for ball in [BallSprite(self.game.get_ball(i)) for i in range(1)]:
-            self.same_c_balls.add(ball)
+        for ball in [BallSprite(self.game.get_ball(i)) for i in range(2)]:
+            if ball.color == self.color:
+                self.same_c_balls.add(ball)
+            else :
+                self.diff_c_balls.add(ball)
             
-        for ball in [BallSprite(self.game.get_ball(i+1)) for i in range(1)]:
-            self.diff_c_balls.add(ball)
         
-        for block in [BlockSprite(self.game.get_block(i)) for i in range(12)]:
-            self.blocks.add(block) 
+        for block in [BlockSprite(self.game.get_block(i)) for i in self.list_blocks]:
+            self.balls.add(ball) 
         
         self.all_sprites = pygame.sprite.Group()
         self.all_sprites.add(self.paddles)
@@ -285,19 +279,15 @@ class Display():
                     events.append("down")
             elif event.type == pygame.QUIT:
                 events.append("quit")
-        if pygame.sprite.collide_rect(self.ball, self.paddles[side]):
-            events.append("collide")
+        
 
         
         # colisiones BOLA - PALA
         for ball, paddle in pygame.sprite.groupcollide(self.diff_c_balls, self.paddles[side], False, False).items():
-            ball_id=ball.ball.ball_id
-            side=paddle.player.side
+            ball_id=ball.ball_id
             event= "collide_p_b_"+str(side)+"_"+str(ball_id)
             events.append(event)
-                
-                
-            
+  
         
         # colisiones BOLA - bloques
         for ball, blocks in pygame.sprite.groupcollide(self.same_c_balls, self.blocks, False, False).items():
@@ -338,7 +328,7 @@ def main(ip_address):
             side,gameinfo = conn.recv()
             print(f"I am playing {SIDESSTR[side]}")
             game.update(gameinfo)
-            display = Display(game)
+            display = Display(game,side)
             while game.is_running():
                 events = display.analyze_events(side)
                 for ev in events:
