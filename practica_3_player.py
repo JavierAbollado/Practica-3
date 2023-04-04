@@ -1,7 +1,7 @@
 
+
 """
-    problema como hacer para que se actualice
-    el color de las pelotas con el diccionario
+    creo que queda mirar bien tema kill() y ya
 """
 
 from multiprocessing.connection import Client
@@ -77,9 +77,13 @@ class Ball():
         self.pos=[ None, None ]
         self.color   = color
         self.ball_id = ball_id
+        self.status = 1
 
     def get_pos(self):
         return self.pos
+    
+    def set_pos(self, status):
+        self.status = status
 
     def set_pos(self, pos):
         self.pos = pos
@@ -100,6 +104,7 @@ class Block():
         # DEBUGGING
         self.pos      = [0,0]
         self.color    = color
+        self.vida    = 1
         self.block_id = block_id
 
     def get_pos(self):
@@ -107,6 +112,9 @@ class Block():
 
     def set_pos(self, pos):
         self.pos = pos
+        
+    def set_vida(self, vida):
+        self.vida = vida
         
     def get_color(self):
         return self.color
@@ -132,22 +140,6 @@ class Game():
     def set_pos_player(self, side: int, pos):
         self.players[side].set_pos(pos)
         
-    # ????? vvvv
-    def get_balls_id(self):
-        return self.balls_list
-    # new_balls_id es una lsita o uno solo??
-    def set_balls_id(self, new_balls_id):
-         self.balls_id = new_balls_id
-    
-    # ????? ^^^^
-
-    # Cambio propuesto
-    def get_balls_id_debugging(self):
-        return [self.balls[i].ball_id for i  in range(2)]
-    def set_balls_id_debugging(self, new_id_list: list):
-        for i  in range(2):
-            self.balls[i].ball_id = new_id_list[i]
-    # Fin cambio propuesto
 
     def get_ball(self,ball_id):
         return self.balls[ball_id]
@@ -155,6 +147,9 @@ class Game():
     
     def get_block(self, block_id: int):
         return self.blocks[block_id]
+    
+    def set_block_vida(self, block_id: int, vida):
+        self.blocks[block_id].set_vida(vida)
 
     def set_ball_pos(self, ball_id: int, pos):
         self.balls[ball_id].set_pos(pos)
@@ -175,18 +170,21 @@ class Game():
         self.balls_dict=(gameinfo['balls_dict'])
         for i in range(2):
 
-            # Resolver vvv
-            # self.set_pos_color
-            # Resolver ^^^
-
             # Solucion:
             # Nueva posicion bolas
             self.balls[i].set_pos(self.balls_dict[i][2])
+            self.balls[i].set_status(self.balls_dict[i][2])
             # Color bolas, si hay que hacer cambio (val = 1)
             # Alternamos el color
             if self.balls_dict[i][1] == 1:
                 self.balls[i].set_color((1-self.balls[i].get_color())%2)
         self.bloques_dict=(gameinfo['bloques_dict'])
+        for i in range(12):
+
+            self.blocks[i].set_vida(self.blocks_dict[i][0])
+            self.blocks[i].set_color(self.blocks_dict[i][1])
+            
+            
         
 
     def is_running(self):
@@ -247,7 +245,6 @@ class BlockSprite(pygame.sprite.Sprite):
         super().__init__()
         self.block=block
         self.color=block.color
-        self.lives=block.lives
         self.pos = block.pos
         self.image = pygame.Surface(BLOCK_SIZE)
         self.image.fill(BLACK)
@@ -259,7 +256,7 @@ class BlockSprite(pygame.sprite.Sprite):
    
 
     def update(self):
-        if self.lives == 0:
+        if self.block.lives == 0:
             self.kill()
         
         pass
