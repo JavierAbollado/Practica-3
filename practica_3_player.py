@@ -273,7 +273,7 @@ class BlockSprite(pygame.sprite.Sprite):
    
 
     def update(self):
-        if self.lives == 0:
+        if self.block.lives == 0:
             self.kill()
 
 
