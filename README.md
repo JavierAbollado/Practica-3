@@ -1,4 +1,4 @@
-# Practica-3
+# Versión 3 - Multijugador
 
 Es una mini version multijugador de la versión 3 del main. He eliminado todas las otras carpetas, pero porque es solo para guardar la versión no voy a hacer 
 ningún commit de ramas. Era para ver un poco cómo funcionaban las conexiones. Me ha funcionado desde el mismo ordenador (será como en clase que estabamos con 
