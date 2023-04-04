@@ -1,7 +1,8 @@
 
 
 """
-    creo que queda mirar bien tema kill() y ya
+creo que queda mirar bien tema kill() y ya
+
 """
 
 from multiprocessing.connection import Client
@@ -48,10 +49,6 @@ VEL_BALL_X, VEL_BALL_Y = 2, 3 # velocidad de la bola
 SIDES = ["left", "right"]
 
 
-
-
-
-
 SIDESSTR = ["left", "right"]
 
 class Player():
@@ -82,7 +79,7 @@ class Ball():
     def get_pos(self):
         return self.pos
     
-    def set_pos(self, status):
+    def set_status(self, status):
         self.status = status
 
     def set_pos(self, pos):
@@ -173,7 +170,7 @@ class Game():
             # Solucion:
             # Nueva posicion bolas
             self.balls[i].set_pos(self.balls_dict[i][2])
-            self.balls[i].set_status(self.balls_dict[i][2])
+            self.balls[i].set_status(self.balls_dict[i][0])
             # Color bolas, si hay que hacer cambio (val = 1)
             # Alternamos el color
             if self.balls_dict[i][1] == 1:
@@ -231,12 +228,13 @@ class BallSprite(pygame.sprite.Sprite):
         self.update()
 
     def update(self):
-        if not self.ball.alive:
+        if self.ball.status==0:
             self.kill()
-        color = RED if self.ball.color == 0 else BLUE
-        pygame.draw.circle(self.image, color, (BALL_SIZE//2, BALL_SIZE//2), BALL_SIZE//2)
-        pos = self.ball.get_pos()
-        self.rect.centerx, self.rect.centery = pos
+        else:
+            color = RED if self.ball.color == 0 else BLUE
+            pygame.draw.circle(self.image, color, (BALL_SIZE//2, BALL_SIZE//2), BALL_SIZE//2)
+            pos = self.ball.get_pos()
+            self.rect.centerx, self.rect.centery = pos
         
         
         
@@ -383,3 +381,4 @@ if __name__=="__main__":
     if len(sys.argv)>1:
         ip_address = sys.argv[1]
     main(ip_address)
+
