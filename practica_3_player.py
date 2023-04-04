@@ -174,9 +174,18 @@ class Game():
         self.running = gameinfo['is_running']
         self.balls_dict=(gameinfo['balls_dict'])
         for i in range(2):
+
             # Resolver vvv
-            self.set_pos_color
+            # self.set_pos_color
             # Resolver ^^^
+
+            # Solucion:
+            # Nueva posicion bolas
+            self.balls[i].set_pos(self.balls_dict[i][2])
+            # Color bolas, si hay que hacer cambio (val = 1)
+            # Alternamos el color
+            if self.balls_dict[i][1] == 1:
+                self.balls[i].set_color((1-self.balls[i].get_color())%2)
         self.bloques_dict=(gameinfo['bloques_dict'])
         
 

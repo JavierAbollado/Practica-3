@@ -134,22 +134,12 @@ class Ball():
 class Game():
     def __init__(self, manager):
         self.players_s = manager.list([Player(i) for i in range(2)])
-        # Linea original main
-        # self.players = [Player(i) for i in range(2)]
-
-        # Lineas originiales main
-        # self.ball_1 = Ball([-1*VEL_BALL_X, VEL_BALL_Y], color=0)
-        # self.ball_2 = Ball([VEL_BALL_X, VEL_BALL_Y], color=1)
         
         self.ball_s = manager.list([Ball([-1*VEL_BALL_X, VEL_BALL_Y], color=0),
                        Ball([VEL_BALL_X, VEL_BALL_Y], color=1)])
-        
-        # Linea original main
-        # self.score = [0,0]
+
         self.score_s = manager.list([0,0])
 
-        # Linea original main
-        # self.running = True
         #  1 <-> True; 0 <-> False
         self.running_s = Value('i', 1)
         
@@ -189,13 +179,9 @@ class Game():
     # Player <-> Side € {0, 1}
     def moveUp(self, player: int):
         self.lock.acquire()
-        
         p = self.players_s[player]
         p.moveUp()
         self.players_s[player] = p
-        # Linea original main
-        # self.players[player].moveUp()
-        
         self.lock.release()
 
     def moveDown(self, player: int):
@@ -203,9 +189,6 @@ class Game():
         p = self.players_s[player]
         p.moveDown()
         self.players_s[player] = p
-        
-        # Linea original main
-        # self.players[player].moveDown()
         self.lock.release()
         
     
@@ -331,7 +314,6 @@ def player(side: int, conn, game):
                 # Color va implicito en side
                 # collide_b_b_X_Y_Z
                 # X: jugador(side) Y: ball_index , Z : block_index
-                # OBS: Y tiene dos cifras, 01,...12
                 # Supongamos la existencia de una constante inicial NBLOQUES
                 NBLOQUES = 12 #MOVER A GLOBAL
                 for termination in [str(i) + "_" + str(j) 
@@ -344,18 +326,13 @@ def player(side: int, conn, game):
                     if command == "collide_b_b_" + termination:
                         # Bien def block collide? Creo que si
                         game.ball_collide(side, ball_index)
-                        # Anadir una funcion que mande restar una vida al
-                        # indice del bloque que colisiona
-                        # necesitamos el color del bloque!
+                        
+                        # Si bola.color == bloque.color, bloque.vida -= 1
                         if game.ball_s[ball_index].color ==\
                         game.block_lives[block_index][1]:
-                            # Como hay cambio de color
-                            # 
-                            # modificar con el color
                             game.set_block_lives(block_index)
                             pass
-                        else:
-                            game.set_block_lives(block_index)
+
                 if command == "quit":
                     game.game_over()
 
