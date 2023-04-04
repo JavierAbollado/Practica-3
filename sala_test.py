@@ -155,7 +155,7 @@ class Game():
         
         self.block_lives = manager.dict()
         # Cambiar esto por el numero correcto
-        for i in range(NBLOQUES=12):
+        for i in range(12):
             # Es dos la vida inicial de un bloque?
             self.block_lives[i] = 2
         self.lock = Lock()
@@ -178,7 +178,7 @@ class Game():
 
     # OK
     def is_running(self):
-        return self.running.value == 1
+        return self.running_s.value == 1
 
     # OK
     def moveUp(self, player):
@@ -266,9 +266,9 @@ class Game():
             'pos_ball_0': self.ball_s[0].get_pos(),
             'pos_ball_1': self.ball_s[1].get_pos(),
             'score': list(self.score_s),
-            'is_running': self.running.value == 1,
+            'is_running': self.running_s.value == 1, #corregido
             # Devuelve un dic con el bloque y las vidas que le quedan
-            'bloques vivos': dict(self.block_lives),  # Para el print
+            'bloques_vivos': dict(self.block_lives),  # Para el print
             'color_bola_0': self.ball_s[0].get_color(),
             'color_bola_1': self.ball_s[1].get_color()
             
@@ -276,7 +276,7 @@ class Game():
         return info
 
     def __str__(self):
-        return f"G<{self.players[PLAYER_2]}:{self.players[PLAYER_1]}:{self.ball}>"
+        return f"G<{self.players_s[PLAYER_2]}:{self.players_s[PLAYER_1]}:{self.ball_s}>"
 
 # OK
 # Revisar si faltan comandos
