@@ -55,7 +55,8 @@ SIDES = ["left", "right"]
 SIDESSTR = ["left", "right"]
 
 class Player():
-    def __init__(self, side):
+    # side € {0, 1}
+    def __init__(self, side: int):
         self.side = side
         self.pos = [None, None]
 
@@ -72,10 +73,10 @@ class Player():
         return f"P<{SIDES[self.side], self.pos}>"
 
 class Ball():
-    def __init__(self,ball_id,color):
+    def __init__(self, ball_id: int, color: int):
         self.pos=[ None, None ]
-        self.color = color
-        self.ball_id=ball_id
+        self.color   = color
+        self.ball_id = ball_id
 
     def get_pos(self):
         return self.pos
@@ -94,12 +95,12 @@ class Ball():
     
     
 class Block():
-    def __init__(self,block_id,color):
+    def __init__(self, block_id: int, color: int):
         # self.pos=[ None, None ] 
         # DEBUGGING
-        self.pos = [0,0]
-        self.color = color
-        self.block_id=block_id
+        self.pos      = [0,0]
+        self.color    = color
+        self.block_id = block_id
 
     def get_pos(self):
         return self.pos
@@ -110,7 +111,7 @@ class Block():
     def get_color(self):
         return self.color
 
-    def set_color(self, color):
+    def set_color(self, color: int):
         self.color = color
 
     def __str__(self):
@@ -120,32 +121,42 @@ class Block():
 class Game():
     def __init__(self):
         self.players = [Player(i) for i in range(2)]
-        self.balls = [Ball(i,i) for i in range(2)]
-        self.blocks = [Block(i, i%2) for i in range(12)]
-        self.score = [0,0]
+        self.balls   = [Ball(i,i) for i in range(2)]
+        self.blocks  = [Block(i, i%2) for i in range(12)]
+        self.score   = [0,0]
         self.running = True
 
-    def get_player(self, side):
+    def get_player(self, side: int):
         return self.players[side]
 
-    def set_pos_player(self, side, pos):
+    def set_pos_player(self, side: int, pos):
         self.players[side].set_pos(pos)
         
+    # ????? vvvv
     def get_balls_id(self):
         return self.balls_list
-
-    def set_balls_id(self,new_balls_id):
-         self.balls_id= new_balls_id
+    # new_balls_id es una lsita o uno solo??
+    def set_balls_id(self, new_balls_id):
+         self.balls_id = new_balls_id
     
+    # ????? ^^^^
+
+    # Cambio propuesto
+    def get_balls_id_debugging(self):
+        return [self.balls[i].ball_id for i  in range(2)]
+    def set_balls_id_debugging(self, new_id_list: list):
+        for i  in range(2):
+            self.balls[i].ball_id = new_id_list[i]
+    # Fin cambio propuesto
 
     def get_ball(self,ball_id):
         return self.balls[ball_id]
+
     
-    
-    def get_block(self,block_id):
+    def get_block(self, block_id: int):
         return self.blocks[block_id]
 
-    def set_ball_pos(self,ball_id, pos):
+    def set_ball_pos(self, ball_id: int, pos):
         self.balls[ball_id].set_pos(pos)
 
     def get_score(self):
@@ -163,7 +174,9 @@ class Game():
         self.running = gameinfo['is_running']
         self.balls_dict=(gameinfo['balls_dict'])
         for i in range(2):
+            # Resolver vvv
             self.set_pos_color
+            # Resolver ^^^
         self.bloques_dict=(gameinfo['bloques_dict'])
         
 
@@ -245,7 +258,7 @@ class BlockSprite(pygame.sprite.Sprite):
 
 
 class Display():
-    def __init__(self, game,side):
+    def __init__(self, game, side: int):
         self.quit = False
         self.game = game
         self.list_blocks=[i for i in range(12)]
@@ -277,7 +290,7 @@ class Display():
         self.background = pygame.image.load('background.png')
         pygame.init()
 
-    def analyze_events(self, side):
+    def analyze_events(self, side: int):
         events = []
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
@@ -364,6 +377,3 @@ if __name__=="__main__":
     if len(sys.argv)>1:
         ip_address = sys.argv[1]
     main(ip_address)
-
-
-

@@ -60,7 +60,7 @@ import traceback
 import sys
 
 class Player():
-    def __init__(self, side):
+    def __init__(self, side: int):
         self.side = side
         if side == PLAYER_1:
             self.pos = [10, SIZE[Y]//4]
@@ -74,13 +74,13 @@ class Player():
         return self.side
 
     def moveDown(self):
-        self.pos[Y] += DELTA
-        if self.pos[Y] > SIZE[Y]:
+        self.pos[Y]    += DELTA
+        if self.pos[Y]  > SIZE[Y]:
             self.pos[Y] = SIZE[Y]
 
     def moveUp(self):
-        self.pos[Y] -= DELTA
-        if self.pos[Y] < 0:
+        self.pos[Y]    -= DELTA
+        if self.pos[Y]  < 0:
             self.pos[Y] = 0
 
     def __str__(self):
@@ -91,7 +91,7 @@ class Player():
 # Jugador ve colision -> comprueba si es suya -> manda mensaje
 # -> Interpretamos mensaje
 class Ball():
-    def __init__(self, velocity, color):  # color € {0,1} -> rojo y azul
+    def __init__(self, velocity, color: int):  # color € {0,1} -> rojo y azul
         self.color = color
         self.pos=[ SIZE[X]//2, SIZE[Y]//2 ]
         self.velocity = velocity
@@ -166,11 +166,11 @@ class Game():
         self.lock = Lock()
 
     # OK
-    def get_player(self, side):
+    def get_player(self, side: int):
         return self.players_s[side]
 
     # OK
-    def get_ball(self, color): 
+    def get_ball(self, color: int): 
         # Linea editada 
         return self.ball_s[0] if color == 0 else self.ball_s[1]
 
@@ -186,7 +186,8 @@ class Game():
         return self.running_s.value == 1
 
     # OK
-    def moveUp(self, player):
+    # Player <-> Side € {0, 1}
+    def moveUp(self, player: int):
         self.lock.acquire()
         
         p = self.players_s[player]
@@ -197,7 +198,7 @@ class Game():
         
         self.lock.release()
 
-    def moveDown(self, player):
+    def moveDown(self, player: int):
         self.lock.acquire()
         p = self.players_s[player]
         p.moveDown()
@@ -210,7 +211,7 @@ class Game():
     
     # Queda el equivalente a ball_colide(self, player)
     # OK
-    def ball_collide(self, player, ball_index):
+    def ball_collide(self, player: int, ball_index: int):
         self.lock.acquire()
         ball = self.ball_s[ball_index]
         ball.collide_player(player)
@@ -257,7 +258,7 @@ class Game():
         self.block_lives[block_index] = p
         self.lock.release()
     
-    def change_colors_g(self, ball_index):
+    def change_colors_g(self, ball_index: int):
         self.lock.acquire()
         # Version de si queremos guardar el color
         # ball_c = self.ball_s[ball_index].color
@@ -270,7 +271,7 @@ class Game():
         self.ball[ball_index] = ball_c
         self.lock.release()
         
-    def colors_not_changed(self, ball_index):
+    def colors_not_changed(self, ball_index: int):
         self.lock.acquire()
         ball_c = self.ball_s[ball_index].color
         ball_c = 0
@@ -281,17 +282,13 @@ class Game():
         info = {
             'pos_left_player': self.players_s[0].get_pos(),
             'pos_right_player': self.players_s[1].get_pos(),
-            # 'pos_ball_0': self.ball_s[0].get_pos(),
-            # 'pos_ball_1': self.ball_s[1].get_pos(),
             'score': list(self.score_s),
             'is_running': self.running_s.value == 1,
             # {id_bloque: (vida, {0 -> mismo color
             #                   , 1 -> cambio de color}, posicion), ..}
-            'bloques_vivos': dict(self.block_lives),  
+            'bloques_dict': dict(self.block_lives),  
             # {id_bola: (status, color, posicion), ..}
-            'info_bolas'   : dict(self.info_bolas)
-            # 'color_bola_0': self.ball_s[0].get_color(),
-            # 'color_bola_1': self.ball_s[1].get_color()
+            'balls_dict'   : dict(self.ball_info)
             
         }
         return info
@@ -303,7 +300,7 @@ class Game():
 # Revisar si faltan comandos
 # Observacion: las bolas deben ir nombradas como el side
 # ball 0 <-> side 0 <-> player 0
-def player(side, conn, game):
+def player(side: int, conn, game):
     try:
         # print(f"starting player {SIDESSTR[side]}:{game.get_info()}")
         conn.send( (side, game.get_info()) )
