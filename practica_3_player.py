@@ -85,8 +85,8 @@ class Ball():
     def __init__(self, ball_id: int, color: int):
         # self.pos=[ None, None ]
         # DEBUGGING
-        self.pos     = [SIZE[0]//2, SIZE[1]//2]
-        self.color   = color
+        self.color   = color 
+        self.pos     = [None, None]
         self.ball_id = ball_id
         self.status = 1
 
@@ -113,7 +113,7 @@ class Block():
     def __init__(self, block_id: int, color: int):
         # self.pos=[ None, None ] 
         # DEBUGGING
-        self.pos      = [0,0]
+        self.pos      = [600 + 40*(block_id%2), 20 + 40*block_id]
         self.color    = color
         self.vidas    = 2
         self.block_id = block_id
@@ -246,7 +246,9 @@ class BallSprite(pygame.sprite.Sprite):
             self.kill()
         else:
             color = RED if self.ball.color == 0 else BLUE
-            pygame.draw.circle(self.image, color, (BALL_SIZE//2, BALL_SIZE//2), BALL_SIZE//2)
+            pygame.draw.circle(self.image, color
+                               , (BALL_SIZE//2, BALL_SIZE//2)
+                               , BALL_SIZE//2)
             pos = self.ball.get_pos()
             (self.rect.centerx, self.rect.centery) = (pos,pos)
         
@@ -256,11 +258,15 @@ class BlockSprite(pygame.sprite.Sprite):
     def __init__(self, block):  # color € {0,1} -> rojo y azul
         super().__init__()
         self.block=block
-        self.color=block.color
+        if block.color == 0:
+            self.color = BLUE_1
+        else:
+            self.color = RED_1
         self.pos = block.pos
         self.image = pygame.Surface(BLOCK_SIZE)
         self.image.fill(BLACK)
-        pygame.draw.rect(self.image, self.color, [0, 0, BALL_SIZE, BALL_SIZE])
+        pygame.draw.rect(self.image, self.color, [0, 0, BLOCK_SIZE[0]
+                                                  , BLOCK_SIZE[1]])
         self.rect = self.image.get_rect()
         self.rect.left, self.rect.top = self.pos
         self.update()
@@ -291,11 +297,13 @@ class Display():
         for padlle in [Paddle(self.game.get_player(i)) for i in range(2)]:
             self.paddles.add(padlle)
         
-        for ball in [BallSprite(self.game.get_ball(i)) for i in self.list_balls]:
+        for ball in [BallSprite(self.game.get_ball(i))
+                     for i in self.list_balls]:
             self.balls.add(ball)
             
         
-        for block in [BlockSprite(self.game.get_block(i)) for i in self.list_blocks]:
+        for block in [BlockSprite(self.game.get_block(i))
+                      for i in self.list_blocks]:
             self.blocks.add(block) 
         
         self.all_sprites = pygame.sprite.Group()
@@ -323,8 +331,11 @@ class Display():
         
 
         
-        # colisiones BOLA - PALA     
-        for ball, paddle in pygame.sprite.groupcollide(self.balls, self.paddles, False, False).items():
+        # colisiones BOLA - PALA      
+        for ball, paddle in pygame.sprite.groupcollide(self.balls
+                                                       , self.paddles
+                                                       , False
+                                                       , False).items():
             ball_id=ball.ball_id
             color=ball.ball.color
             if color==side:
@@ -333,13 +344,17 @@ class Display():
   
         
         # colisiones BOLA - bloques
-        for ball, blocks in pygame.sprite.groupcollide(self.balls, self.blocks, False, False).items():
+        for ball, blocks in pygame.sprite.groupcollide(self.balls
+                                                       , self.blocks
+                                                       , False
+                                                       , False).items():
             block=blocks[0]
             ball_id=ball.ball.ball_id
             color=ball.ball.color
             block_id=block.block_id
             if color!=side:
-                event= "collide_b_b_"+str(color)+"_"+str(ball_id)+"_"+str(block_id)
+                event= "collide_b_b_" + str(color) + "_" + str(ball_id) +\
+                    "_" + str(block_id)
                 events.append(event)
         
         return events

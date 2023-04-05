@@ -94,7 +94,8 @@ class Player():
 class Ball():
     def __init__(self, velocity, color: int):  # color € {0,1} -> rojo y azul
         self.color = color
-        self.pos=[ SIZE[X]//2, SIZE[Y]//2 ]
+        self.pos=[ (SIZE[X]//4)*self.color + SIZE[X]//3
+                  , (SIZE[Y]//4)*self.color + SIZE[Y]//3 ]
         self.velocity = velocity
         self.alive = True 
         # Probablemente esto deberia llegar en mensaje
@@ -136,8 +137,8 @@ class Game():
     def __init__(self, manager):
         self.players_s = manager.list([Player(i) for i in range(2)])
         
-        self.ball_s = manager.list([Ball([-1*VEL_BALL_X, VEL_BALL_Y], color=0),
-                       Ball([VEL_BALL_X, VEL_BALL_Y], color=1)])
+        self.ball_s = manager.list([Ball([-1*VEL_BALL_X, VEL_BALL_Y], color=0)
+                                    , Ball([VEL_BALL_X, VEL_BALL_Y], color=1)])
 
         self.score_s = manager.list([0,0])
 
@@ -149,10 +150,12 @@ class Game():
         # Cambiar esto por el numero correcto
         for i in range(12):
             # Es dos la vida inicial de un bloque?
-            self.block_lives[i] = (2, i%2, (0,0))
+            self.block_lives[i] = (2, i%2, [600 + 40*(i%2), 20 + 40*i])
         
         for i in range(len(list(self.ball_s))):
-            self.ball_info[i] = (1, i%2, 700//2, 525//2)
+            self.ball_info[i] = (1, self.ball_s[i].color
+                                 , self.ball_s[i].pos[0]
+                                 , self.ball_s[i].pos[1])
             
         self.lock = Lock()
 
@@ -170,7 +173,7 @@ class Game():
 
     # OK <-> stop()
     def game_over(self):
-        self.running.value = 0
+        self.running_s.value = 0
 
     # OK
     def is_running(self):
@@ -180,6 +183,8 @@ class Game():
     # Player <-> Side € {0, 1}
     def moveUp(self, player: int):
         self.lock.acquire()
+        # Si no problema por alguna razon
+        player = int(player)
         p = self.players_s[player]
         p.moveUp()
         self.players_s[player] = p
@@ -187,6 +192,8 @@ class Game():
 
     def moveDown(self, player: int):
         self.lock.acquire()
+        # Si no problema por alguna razon
+        player = int(player)
         p = self.players_s[player]
         p.moveDown()
         self.players_s[player] = p
@@ -207,16 +214,6 @@ class Game():
     # OK
     def movements(self):
         self.lock.acquire()
-        # Lineas originales de main
-        # for ball in [self.ball_1, self.ball_2]:
-        #     ball.update()
-        #     pos = ball.get_pos()
-        #     if pos[Y]<0 or pos[Y]>SIZE[Y]:
-        #         ball.bounce(Y)
-        #     if pos[X]>SIZE[X]:
-        #         ball.bounce(X)
-        #     elif pos[X]<0:
-        #         ball.kill()
 
         for index, b in enumerate(list(self.ball_s)):
             ball = self.ball_s[index]
@@ -284,7 +281,7 @@ class Game():
 # Revisar si faltan comandos
 # Observacion: las bolas deben ir nombradas como el side
 # ball 0 <-> side 0 <-> player 0
-def player(side: int, conn, game):
+def player(side, conn, game):
     try:
         # print(f"starting player {SIDESSTR[side]}:{game.get_info()}")
         conn.send( (side, game.get_info()) )
@@ -336,7 +333,8 @@ def player(side: int, conn, game):
 
                 if command == "quit":
                     game.game_over()
-
+            # IMP
+            game.movements()
             if side == 1:
                 game.move_ball()
             conn.send(game.get_info())
