@@ -317,7 +317,7 @@ def player(side: int, conn, game):
                 # X: jugador(side) Y: ball_index , Z : block_index
                 # Supongamos la existencia de una constante inicial NBLOQUES
                 NBLOQUES = 12 #MOVER A GLOBAL
-                for termination in [str(i) + "_" + str(j) 
+                for termination in [str(side) + "_" +str(i) + "_" + str(j) 
                                     for i in range(2)
                                     for j in range(NBLOQUES)]:
                     partida = termination.split("_")
