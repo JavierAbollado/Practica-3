@@ -40,7 +40,7 @@ BALL_SIZE = 12
 BLOCK_SIZE = (25,50)
 FPS = 60
 DELTA = 5 #30
-VEL_BALL_X, VEL_BALL_Y = 2, 3 # velocidad de la bola
+VEL_BALL_X, VEL_BALL_Y = 1, 1 # velocidad de la bola
 
 SIDES = ["left", "right"]
 
@@ -97,7 +97,7 @@ class Ball():
         self.pos=[ (SIZE[X]//4)*self.color + SIZE[X]//3
                   , (SIZE[Y]//4)*self.color + SIZE[Y]//3 ]
         self.velocity = velocity
-        self.alive = True 
+        self.alive = 1 
         # Probablemente esto deberia llegar en mensaje
 
     def get_pos(self):
@@ -105,7 +105,7 @@ class Ball():
 
     # Probablemente esto deberia llegar en mensaje
     def kill(self):
-        self.alive = False
+        self.alive = 0
     
     def get_status(self):
         return self.alive
@@ -154,8 +154,8 @@ class Game():
         
         for i in range(len(list(self.ball_s))):
             self.ball_info[i] = (1, self.ball_s[i].color
-                                 , self.ball_s[i].pos[0]
-                                 , self.ball_s[i].pos[1])
+                                 , [self.ball_s[i].pos[0]
+                                 , self.ball_s[i].pos[1]])
             
         self.lock = Lock()
 
@@ -183,8 +183,7 @@ class Game():
     # Player <-> Side € {0, 1}
     def moveUp(self, player: int):
         self.lock.acquire()
-        # Si no problema por alguna razon
-        player = int(player)
+        player = player
         p = self.players_s[player]
         p.moveUp()
         self.players_s[player] = p
@@ -192,8 +191,7 @@ class Game():
 
     def moveDown(self, player: int):
         self.lock.acquire()
-        # Si no problema por alguna razon
-        player = int(player)
+        player = player
         p = self.players_s[player]
         p.moveDown()
         self.players_s[player] = p
@@ -205,8 +203,10 @@ class Game():
     def ball_collide(self, player: int, ball_index: int):
         self.lock.acquire()
         ball = self.ball_s[ball_index]
+        print(ball)
         ball.collide_player(player)
-        self.ball[ball_index] = ball
+        
+        self.ball_s[ball_index] = ball
         self.lock.release()
         
     # Falta ball collide bloque
@@ -217,6 +217,7 @@ class Game():
 
         for index, b in enumerate(list(self.ball_s)):
             ball = self.ball_s[index]
+            print(self.ball_s)
             ball.update()
             pos = ball.get_pos()
             if pos[Y]<0 or pos[Y]>SIZE[Y]:
@@ -226,16 +227,20 @@ class Game():
             elif pos[X]<0:
                 ball.kill()
             self.ball_s[index] = ball
-                
+            self.ball_info[index] = (ball.get_status()
+                                     , ball.get_color()
+                                     , ball.get_pos())
         self.lock.release()
 
     def get_block_lives(self):
         return self.block_lives
     
-    def set_block_lives(self, block_index):
+    def set_block_lives(self, block_index: int):
         self.lock.acquire()
         p = self.block_lives[block_index]
-        p -= 1
+        p = (self.block_lives[block_index][0]-1
+             , self.block_lives[block_index][1]
+             , self.block_lives[block_index][2])
         self.block_lives[block_index] = p
         self.lock.release()
     
@@ -249,7 +254,7 @@ class Game():
         # Version que solo dice que ha cambiado el color
         ball_c = self.ball_s[ball_index].color
         ball_c = 1
-        self.ball[ball_index] = ball_c
+        self.ball_s[ball_index] = ball_c
         self.lock.release()
         
     def colors_not_changed(self, ball_index: int):
@@ -281,7 +286,7 @@ class Game():
 # Revisar si faltan comandos
 # Observacion: las bolas deben ir nombradas como el side
 # ball 0 <-> side 0 <-> player 0
-def player(side, conn, game):
+def player(side: int, conn, game):
     try:
         # print(f"starting player {SIDESSTR[side]}:{game.get_info()}")
         conn.send( (side, game.get_info()) )
@@ -298,8 +303,9 @@ def player(side, conn, game):
                 for termination in [str(i)+"_"+str(j) 
                                     for i in range(2) for j in range(2)]:
                     partida = termination.split("_")
-                    side = partida[-2]
-                    ball_index = partida[-1]
+                    # Son str hay que cambiar tipo a int
+                    side = int(partida[-2])
+                    ball_index = int(partida[-1])
                     if command == "collide_p_b_" + termination:
                         game.ball_collide(side, ball_index)
                         # mismo color y cambiamos al opuesto
@@ -318,9 +324,10 @@ def player(side, conn, game):
                                     for i in range(2)
                                     for j in range(NBLOQUES)]:
                     partida = termination.split("_")
-                    side = partida[-3]
-                    ball_index = partida[-2]
-                    block_index = partida[-1]
+                    # Son str hay que convertir a int
+                    side = int(partida[-3])
+                    ball_index = int(partida[-2])
+                    block_index = int(partida[-1])
                     if command == "collide_b_b_" + termination:
                         # Bien def block collide? Creo que si
                         game.ball_collide(side, ball_index)
@@ -334,9 +341,11 @@ def player(side, conn, game):
                 if command == "quit":
                     game.game_over()
             # IMP
-            game.movements()
+            # game.movements()
             if side == 1:
-                game.move_ball()
+                # game.movements no esta actualizando correctamente la info
+                # print(game.get_info()['balls_dict'])
+                game.movements()
             conn.send(game.get_info())
     except:
         traceback.print_exc()

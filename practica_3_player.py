@@ -43,7 +43,7 @@ BALL_SIZE = 12
 BLOCK_SIZE =[40,40]
 FPS = 60
 DELTA = 5 #30
-VEL_BALL_X, VEL_BALL_Y = 2, 3 # velocidad de la bola
+VEL_BALL_X, VEL_BALL_Y = 1, 1 # velocidad de la bola
 
 SIDES = ["left", "right"]
 
@@ -250,7 +250,7 @@ class BallSprite(pygame.sprite.Sprite):
                                , (BALL_SIZE//2, BALL_SIZE//2)
                                , BALL_SIZE//2)
             pos = self.ball.get_pos()
-            (self.rect.centerx, self.rect.centery) = (pos,pos)
+            (self.rect.centerx, self.rect.centery) = pos
         
         
         
@@ -348,10 +348,14 @@ class Display():
                                                        , self.blocks
                                                        , False
                                                        , False).items():
-            block=blocks[0]
-            ball_id=ball.ball.ball_id
-            color=ball.ball.color
-            block_id=block.block_id
+            # OK
+            ball_id  = ball.ball.ball_id
+            # Ok
+            color    = ball.ball.color
+            # Error
+            # block    = blocks.block
+            print(blocks)
+            block_id = blocks[0].block.block_id
             if color!=side:
                 event= "collide_b_b_" + str(color) + "_" + str(ball_id) +\
                     "_" + str(block_id)
