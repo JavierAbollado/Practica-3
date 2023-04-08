@@ -257,12 +257,12 @@ class Game():
         # self.ball_s[ball_index].color  = ball_c
         self.lock.release()
         
-    def colors_not_changed(self, ball_index: int):
-        self.lock.acquire()
-        ball_c = self.ball_s[ball_index].color
-        ball_c = 0
-        self.ball_s[ball_index].color = ball_c
-        self.lock.release()
+    # def colors_not_changed(self, ball_index: int):
+    #     self.lock.acquire()
+    #     ball_c = self.ball_s[ball_index].color
+    #     ball_c = 0
+    #     self.ball_s[ball_index].color = ball_c
+    #     self.lock.release()
     # OK, revisar si falta mas informacion
     def get_info(self):
         info = {
@@ -295,23 +295,22 @@ def player(side: int, conn, game):
             command = ""
             while command != "next":
                 command = conn.recv()
-                for i in range(2):
-                    if command == "up_" + str(i):
-                        game.moveUp(i)
-                    elif command == "down_" + str(i):
-                        game.moveDown(i)
+                if command == "up_" + str(side):
+                    game.moveUp(side)
+                elif command == "down_" + str(side):
+                    game.moveDown(side)
                 # collide_p_b_X_Y, X : side, Y : ball_index
                 # Combandos colision bola-pala
                 for termination in [str(i)+"_"+str(j) 
                                     for i in range(2) for j in range(2)]:
                     partida = termination.split("_")
                     # Son str hay que cambiar tipo a int
-                    side = int(partida[-2])
+                    side_info = int(partida[-2])
                     ball_index = int(partida[-1])
                     if command == "collide_p_b_" + termination:
-                        game.ball_collide(side, ball_index)
+                        game.ball_collide(side_info, ball_index)
                         # mismo color y cambiamos al opuesto
-                        if side != game.ball_s[ball_index].color:
+                        if side_info != game.ball_s[ball_index].color:
                             game.change_colors_g(ball_index)
                         # else:
                         #     game.colors_not_changed(ball_index)
@@ -322,6 +321,7 @@ def player(side: int, conn, game):
                 # X: jugador(side) Y: ball_index , Z : block_index
                 # Supongamos la existencia de una constante inicial NBLOQUES
                 NBLOQUES = 12 #MOVER A GLOBAL
+                print(side)
                 for termination in [str(side) + "_" +str(i) + "_" + str(j) 
                                     for i in range(2)
                                     for j in range(NBLOQUES)]:
