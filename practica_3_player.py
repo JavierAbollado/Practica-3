@@ -325,9 +325,9 @@ class Display():
                     if event.key == pygame.K_ESCAPE:
                         events.append("quit")
                     elif event.key == pygame.K_UP:
-                        events.append("up")
+                        events.append("up_1")
                     elif event.key == pygame.K_DOWN:
-                        events.append("down")
+                        events.append("down_1")
                 elif event.type == pygame.QUIT:
                     events.append("quit")
             if side == 0:
@@ -335,9 +335,9 @@ class Display():
                     if event.key == pygame.K_ESCAPE:
                         events.append("quit")
                     elif event.key == pygame.K_k:
-                        events.append("up")
+                        events.append("up_0")
                     elif event.key == pygame.K_m:
-                        events.append("down")
+                        events.append("down_0")
                 elif event.type == pygame.QUIT:
                     events.append("quit")
             

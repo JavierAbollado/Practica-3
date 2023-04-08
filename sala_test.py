@@ -278,7 +278,6 @@ class Game():
             'balls_dict'   : dict(self.ball_info)
             
         }
-        print(self.players_s[1].get_pos())
         return info
 
     def __str__(self):
@@ -296,10 +295,11 @@ def player(side: int, conn, game):
             command = ""
             while command != "next":
                 command = conn.recv()
-                if command == "up":
-                    game.moveUp(side)
-                elif command == "down":
-                    game.moveDown(side)
+                for i in range(2):
+                    if command == "up_" + str(i):
+                        game.moveUp(i)
+                    elif command == "down_" + str(i):
+                        game.moveDown(i)
                 # collide_p_b_X_Y, X : side, Y : ball_index
                 # Combandos colision bola-pala
                 for termination in [str(i)+"_"+str(j) 
@@ -343,8 +343,6 @@ def player(side: int, conn, game):
             # IMP
             # game.movements()
             if side == 1:
-                # game.movements no esta actualizando correctamente la info
-                # print(game.get_info()['balls_dict'])
                 game.movements()
             conn.send(game.get_info())
     except:
