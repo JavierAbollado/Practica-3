@@ -338,9 +338,9 @@ class Display():
                                                        , False).items():
             ball_id=ball.ball_id
             color=ball.ball.color
-            if color==side:
-                event= "collide_p_b_"+str(side)+"_"+str(ball_id)
-                events.append(event)
+            # Una de las dos no funciona bien, por que?
+            event= "collide_p_b_"+str(side)+"_"+str(ball_id)
+            events.append(event)
   
         
         # colisiones BOLA - bloques
@@ -354,12 +354,12 @@ class Display():
             color    = ball.ball.color
             # Error
             # block    = blocks.block
-            print(blocks)
             block_id = blocks[0].block.block_id
-            if color!=side:
-                event= "collide_b_b_" + str(color) + "_" + str(ball_id) +\
-                    "_" + str(block_id)
-                events.append(event)
+            # if color!=side:, la colision se produce siempre!
+            # Obs: ahora no mueren los bloques
+            event= "collide_b_b_" + str(color) + "_" + str(ball_id) +\
+                "_" + str(block_id)
+            events.append(event)
         
         return events
 
