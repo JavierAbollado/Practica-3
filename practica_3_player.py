@@ -23,7 +23,7 @@ RED_1 = (255, 0, 0)
 RED_2 = (120, 0, 0)
 
 COLORS_BLOCK = [[RED_1, RED_2], [BLUE_1, BLUE_2]]
-PLAYER_COLOR = [RED, BLUE]
+PLAYER_COLOR = [YELLOW, BLUE]
 
 # ejes
 X = 0
@@ -185,10 +185,11 @@ class Game():
             # Nueva posicion bolas
             self.balls[i].set_pos(self.balls_dict[i][2])
             self.balls[i].set_status(self.balls_dict[i][0])
+            self.balls[i].set_color(self.balls_dict[i][1])
             # Color bolas, si hay que hacer cambio (val = 1)
             # Alternamos el color
-            if self.balls_dict[i][1] == 1:
-                self.balls[i].set_color((1-self.balls[i].get_color())%2)
+            # if self.balls_dict[i][1] == 1:
+            #     self.balls[i].set_color((1-self.balls[i].get_color())%2)
         self.bloques_dict=(gameinfo['bloques_dict'])
         for i in range(12):
 
@@ -319,16 +320,27 @@ class Display():
     def analyze_events(self, side: int):
         events = []
         for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
+            if side == 1:
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        events.append("quit")
+                    elif event.key == pygame.K_UP:
+                        events.append("up")
+                    elif event.key == pygame.K_DOWN:
+                        events.append("down")
+                elif event.type == pygame.QUIT:
                     events.append("quit")
-                elif event.key == pygame.K_UP:
-                    events.append("up")
-                elif event.key == pygame.K_DOWN:
-                    events.append("down")
-            elif event.type == pygame.QUIT:
-                events.append("quit")
-        
+            if side == 0:
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        events.append("quit")
+                    elif event.key == pygame.K_k:
+                        events.append("up")
+                    elif event.key == pygame.K_m:
+                        events.append("down")
+                elif event.type == pygame.QUIT:
+                    events.append("quit")
+            
 
         
         # colisiones BOLA - PALA      
@@ -339,7 +351,7 @@ class Display():
             ball_id=ball.ball_id
             color=ball.ball.color
             # Una de las dos no funciona bien, por que?
-            event= "collide_p_b_"+str(side)+"_"+str(ball_id)
+            event= "collide_p_b_"+ str(side)+ "_"+str(ball_id)
             events.append(event)
   
         
@@ -357,7 +369,8 @@ class Display():
             block_id = blocks[0].block.block_id
             # if color!=side:, la colision se produce siempre!
             # Obs: ahora no mueren los bloques
-            event= "collide_b_b_" + str(color) + "_" + str(ball_id) +\
+            # !!!!
+            event= "collide_b_b_" + str(side) + "_" + str(ball_id) +\
                 "_" + str(block_id)
             events.append(event)
         

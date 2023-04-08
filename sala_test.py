@@ -39,7 +39,7 @@ BALL_COLOR = WHITE
 BALL_SIZE = 12
 BLOCK_SIZE = (25,50)
 FPS = 60
-DELTA = 5 #30
+DELTA = 30 #30
 VEL_BALL_X, VEL_BALL_Y = 1, 1 # velocidad de la bola
 
 SIDES = ["left", "right"]
@@ -183,7 +183,6 @@ class Game():
     # Player <-> Side € {0, 1}
     def moveUp(self, player: int):
         self.lock.acquire()
-        player = player
         p = self.players_s[player]
         p.moveUp()
         self.players_s[player] = p
@@ -204,6 +203,8 @@ class Game():
         self.lock.acquire()
         ball = self.ball_s[ball_index]
         print(ball)
+        # Last change
+        # Hace que rebote bien la roja pero mal la azul
         ball.collide_player(player)
         
         self.ball_s[ball_index] = ball
@@ -217,7 +218,6 @@ class Game():
 
         for index, b in enumerate(list(self.ball_s)):
             ball = self.ball_s[index]
-            print(self.ball_s)
             ball.update()
             pos = ball.get_pos()
             if pos[Y]<0 or pos[Y]>SIZE[Y]:
@@ -247,14 +247,14 @@ class Game():
     def change_colors_g(self, ball_index: int):
         self.lock.acquire()
         # Version de si queremos guardar el color
-        # ball_c = self.ball_s[ball_index].color
-        # ball_c = (ball_c - 1)%2
-        # self.ball[ball_index] = ball_c
+        ball   = self.ball_s[ball_index]
+        ball.change_color()
+        self.ball_s[ball_index]  = ball
         
         # Version que solo dice que ha cambiado el color
-        ball_c = self.ball_s[ball_index].color
-        ball_c = 1
-        self.ball_s[ball_index] = ball_c
+        # ball_c = self.ball_s[ball_index].color
+        # ball_c = 1
+        # self.ball_s[ball_index].color  = ball_c
         self.lock.release()
         
     def colors_not_changed(self, ball_index: int):
@@ -266,6 +266,7 @@ class Game():
     # OK, revisar si falta mas informacion
     def get_info(self):
         info = {
+
             'pos_left_player': self.players_s[0].get_pos(),
             'pos_right_player': self.players_s[1].get_pos(),
             'score': list(self.score_s),
@@ -277,6 +278,7 @@ class Game():
             'balls_dict'   : dict(self.ball_info)
             
         }
+        print(self.players_s[1].get_pos())
         return info
 
     def __str__(self):
@@ -309,10 +311,10 @@ def player(side: int, conn, game):
                     if command == "collide_p_b_" + termination:
                         game.ball_collide(side, ball_index)
                         # mismo color y cambiamos al opuesto
-                        if side == game.ball_s[ball_index].color:
+                        if side != game.ball_s[ball_index].color:
                             game.change_colors_g(ball_index)
-                        else:
-                            game.colors_not_changed(ball_index)
+                        # else:
+                        #     game.colors_not_changed(ball_index)
                 # Vamos a hacer lo mismo con los bloques
                 # Comandos colision bola-bloque
                 # Color va implicito en side
@@ -329,14 +331,12 @@ def player(side: int, conn, game):
                     ball_index = int(partida[-2])
                     block_index = int(partida[-1])
                     if command == "collide_b_b_" + termination:
+
                         # Bien def block collide? Creo que si
                         game.ball_collide(side, ball_index)
-                        
                         # Si bola.color == bloque.color, bloque.vida -= 1
-                        if game.ball_s[ball_index].color ==\
-                        game.block_lives[block_index][1]:
+                        if game.ball_s[ball_index].color == game.block_lives[block_index][1]:
                             game.set_block_lives(block_index)
-                            pass
 
                 if command == "quit":
                     game.game_over()
@@ -357,18 +357,7 @@ def player(side: int, conn, game):
 # Seguramente falten adiciones
 def main(ip_address):
     manager = Manager()
-    # Lineas origianles main
-    # try:
-    #     game = Game()
-    #     display = Display(game)
 
-    #     while not display.quit:
-    #         game.movements()
-    #         display.analyze_events()
-    #         display.refresh()
-    #         display.tick()
-    # finally:
-    #     pygame.quit()
     try:
         with Listener((ip_address, 6000),
                       authkey=b'secret password') as listener:
