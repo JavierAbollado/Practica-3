@@ -40,7 +40,7 @@ BALL_SIZE = 12
 BLOCK_SIZE = (25,50)
 FPS = 60
 DELTA = 30 #30
-VEL_BALL_X, VEL_BALL_Y = 1, 1 # velocidad de la bola
+VEL_BALL_X, VEL_BALL_Y = 2, 2 # velocidad de la bola
 
 SIDES = ["left", "right"]
 
@@ -301,8 +301,8 @@ def player(side: int, conn, game):
                     game.moveDown(side)
                 # collide_p_b_X_Y, X : side, Y : ball_index
                 # Combandos colision bola-pala
-                for termination in [str(i)+"_"+str(j) 
-                                    for i in range(2) for j in range(2)]:
+                for termination in [str(side)+"_"+str(j) 
+                                    for j in range(2)]:
                     partida = termination.split("_")
                     # Son str hay que cambiar tipo a int
                     side_info = int(partida[-2])
