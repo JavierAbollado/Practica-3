@@ -325,9 +325,9 @@ class Display():
                     if event.key == pygame.K_ESCAPE:
                         events.append("quit")
                     elif event.key == pygame.K_UP:
-                        events.append("up_1")
+                        events.append("up")
                     elif event.key == pygame.K_DOWN:
-                        events.append("down_1")
+                        events.append("down")
                 elif event.type == pygame.QUIT:
                     events.append("quit")
             if side == 0:
@@ -335,9 +335,9 @@ class Display():
                     if event.key == pygame.K_ESCAPE:
                         events.append("quit")
                     elif event.key == pygame.K_k:
-                        events.append("up_0")
+                        events.append("up")
                     elif event.key == pygame.K_m:
-                        events.append("down_0")
+                        events.append("down")
                 elif event.type == pygame.QUIT:
                     events.append("quit")
             
@@ -348,11 +348,16 @@ class Display():
                                                        , self.paddles
                                                        , False
                                                        , False).items():
+            print(paddle)
             ball_id=ball.ball_id
             color=ball.ball.color
             # Una de las dos no funciona bien, por que?
-            event= "collide_p_b_"+ str(side)+ "_"+str(ball_id)
-            events.append(event)
+            print(paddle)
+            
+            side_info = str(paddle[0].player.get_side())
+            if side_info == str(side):
+                event= "collide_p_b_" + side_info + "_" + str(ball_id)
+                events.append(event)
   
         
         # colisiones BOLA - bloques
@@ -370,9 +375,10 @@ class Display():
             # if color!=side:, la colision se produce siempre!
             # Obs: ahora no mueren los bloques
             # !!!!
-            event= "collide_b_b_" + str(side) + "_" + str(ball_id) +\
-                "_" + str(block_id)
-            events.append(event)
+            if side == ball_id:
+                event= "collide_b_b_" + str(side) + "_" + str(ball_id) +\
+                    "_" + str(block_id)
+                events.append(event)
         
         return events
 

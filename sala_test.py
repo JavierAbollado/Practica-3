@@ -124,8 +124,8 @@ class Ball():
         self.velocity[AXIS] = -self.velocity[AXIS]
 
     # Reutilizable como collide block??
-    def collide_player(self, AXIS=X):
-        self.bounce(AXIS)
+    def collide_player(self, side):
+        self.bounce(X)
         for i in range(3):
             self.update()
 
@@ -206,7 +206,6 @@ class Game():
         # Last change
         # Hace que rebote bien la roja pero mal la azul
         ball.collide_player(player)
-        
         self.ball_s[ball_index] = ball
         self.lock.release()
         
@@ -295,9 +294,9 @@ def player(side: int, conn, game):
             command = ""
             while command != "next":
                 command = conn.recv()
-                if command == "up_" + str(side):
+                if command == "up":
                     game.moveUp(side)
-                elif command == "down_" + str(side):
+                elif command == "down":
                     game.moveDown(side)
                 # collide_p_b_X_Y, X : side, Y : ball_index
                 # Combandos colision bola-pala
@@ -307,7 +306,7 @@ def player(side: int, conn, game):
                     # Son str hay que cambiar tipo a int
                     side_info = int(partida[-2])
                     ball_index = int(partida[-1])
-                    if command == "collide_p_b_" + termination:
+                    if command == "collide_p_b_" + termination :
                         game.ball_collide(side_info, ball_index)
                         # mismo color y cambiamos al opuesto
                         if side_info != game.ball_s[ball_index].color:
@@ -321,8 +320,7 @@ def player(side: int, conn, game):
                 # X: jugador(side) Y: ball_index , Z : block_index
                 # Supongamos la existencia de una constante inicial NBLOQUES
                 NBLOQUES = 12 #MOVER A GLOBAL
-                print(side)
-                for termination in [str(side) + "_" +str(i) + "_" + str(j) 
+                for termination in [str(side) + "_" + str(i) + "_" + str(j) 
                                     for i in range(2)
                                     for j in range(NBLOQUES)]:
                     partida = termination.split("_")
@@ -335,7 +333,7 @@ def player(side: int, conn, game):
                         # Bien def block collide? Creo que si
                         game.ball_collide(side, ball_index)
                         # Si bola.color == bloque.color, bloque.vida -= 1
-                        if game.ball_s[ball_index].color == game.block_lives[block_index][1]:
+                        if game.ball_s[ball_index].color != game.block_lives[block_index][1]:
                             game.set_block_lives(block_index)
 
                 if command == "quit":
