@@ -123,7 +123,7 @@ class Ball():
     def bounce(self, AXIS):
         self.velocity[AXIS] = -self.velocity[AXIS]
 
-    # Reutilizable como collide block??
+    #Reutilizable como collide block??
     def collide_player(self, side):
         self.bounce(X)
         for i in range(3):
