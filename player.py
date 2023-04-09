@@ -2,22 +2,34 @@ from multiprocessing.connection import Client
 import traceback
 import pygame
 import numpy as np
-import sys, os
+import sys, os, time
 
-from constantes import FPS, SIZE
+from constantes import *
+from sprites import Game, GameOver, LevelComplete, BlockNewBalls
 
 SIDES = ["left", "right"]
 SIDESSTR = ["left", "right"]
 
-class Player_Display:
+
+
+class Player_Display():
 
     def __init__(self, side):
-        pygame.init()
+
+        # game
         self.side = side
+        self.other_side = 1 - side
+        self.game = Game()
+        self.gameover = GameOver()
+        self.levelcompleted = LevelComplete()
+
+        # display
+        self.quit = False
         self.screen = pygame.display.set_mode(SIZE)
         self.clock =  pygame.time.Clock()  #FPS
-        self.runnig = True
-    
+        pygame.init()
+
+    # Checkear solamente los movimientos de nuestra paleta (y el "quit")
     def analyze_events(self):
         
         events = []
@@ -31,33 +43,50 @@ class Player_Display:
         # mover palas
         keys = pygame.key.get_pressed()
         if keys[pygame.K_KP4]:
+            self.game.moveLeft(PLAYERS[self.side])
             events.append("left")
         if keys[pygame.K_KP6]:
             events.append("right")
+            self.game.moveRight(PLAYERS[self.side])
 
         return events
     
-    def is_running(self):
-        return self.runnig
-
-    def stop(self):
-        self.runnig = False
+    # Actualizar las posiciones del juego según los nuevos cambios en la sala
+    # "changes" es una lista de strings
+    def update_from_sala(self, changes):
+        pass
     
-    def update(self, screen):
-        self.screen.blit(screen, (0, 0))
+    # Actualizar las posiciones del juego según los nuevos cambios del otro jugador
+    # "changes" es una lista de strings
+    def update_from_player(self, changes):
+        for event in changes:
+            if event == "quit":
+                self.stop()
+            elif event == "left":
+                self.game.moveLeft(PLAYERS[self.other_side])
+            elif event == "right":
+                self.game.moveRight(PLAYERS[self.other_side])
+
+    # Refrescar la pantalla (antes debemos hacer un update)
+    def refresh(self):
+        self.game.all_sprites.update()
+        # Si alguno ha perdido poner activar "Fin del Juego"
+        # Según hallas ganado o perdido te aparecerá un mensaje diferente. 
+        if not self.game.is_running():
+            if self.game.win:
+                self.levelcompleted.draw(self.screen)
+            else:
+                self.gameover.draw(self.screen)
+        # Si no, actualizar la partida 
+        else:
+            self.screen.blit(IM_background, (0, 0))
+            self.game.all_sprites.draw(self.screen)
+        self.window.blit(self.screen, (0,0))
         pygame.display.flip()
-        # self.clock.tick(FPS)
-    
-    @staticmethod
-    def quit():
-        pygame.quit()
+        self.tick()
 
-
-def recv_screen(conn):
-    data = conn.recv_bytes()
-    pixels = np.frombuffer(data, dtype=np.uint8)
-    image = pygame.surfarray.make_surface(pixels.reshape((SIZE[1], SIZE[0], 3)))
-    return image
+    def tick(self):
+        self.clock.tick(FPS)
 
 
 def main(ip_address):
@@ -66,8 +95,6 @@ def main(ip_address):
             
             # recibir conexion
             side = conn.recv()
-            print(side)
-            # screen = conn.recv() 
             print(f"I am playing {SIDESSTR[side]}")
             
             # inciar display
@@ -75,12 +102,24 @@ def main(ip_address):
 
             # comenzar partida
             while myDisplay.is_running():
+
+                # analizar (y enviar a la sala) mis movimientos
                 events = myDisplay.analyze_events()
                 for ev in events:
                     conn.send(ev)
                 conn.send("next")
-                screen = recv_screen(conn)
-                myDisplay.update(screen)
+                
+                # recibir los cambios del otro jugador
+                player_changes = conn.recv()
+                myDisplay.update_from_player(player_changes)
+                
+                # recibir los cambios de la sala
+                changes = conn.recv()
+                myDisplay.update_from_sala(changes)
+                
+                # actualizar pantalla
+                myDisplay.refresh()
+
     except:
         traceback.print_exc()
     finally:
