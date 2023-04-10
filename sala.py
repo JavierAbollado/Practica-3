@@ -10,18 +10,16 @@ from constantes import *
 from sprites import *
 
 
-
 class Sala():
 
     def __init__(self):
 
         # game
         self.game = Game()
+        self.id_ball = self.game.add_new_balls(n=2, id=0)
 
         # display
         self.quit = False
-        # self.screen = pygame.Surface(SIZE)
-        # self.window = pygame.display.set_mode(SIZE)
         self.clock =  pygame.time.Clock()  #FPS
         pygame.init()
 
@@ -35,39 +33,55 @@ class Sala():
         if not self.game.is_running():
             return []
 
+        ####################################################################
+        # Formato de los códigos: "x1-x2-x3" 
+        #
+        # donde,
+        #    x1 = nombre del objeto afectado: ball, block, be
+        #    x2 = id del objeto
+        #    x3 = código de la acción a realizar
+        #
+        # códigos del x3 para cada objeto:
+        #    ball:
+        #       cc = change color
+        #       c{X} = collide, con AXIS = X
+        #    block:
+        #       gs = get shot
+        #    be:
+        #       nº = nº de bolas a generar
+        ####################################################################
+
         changes = []
 
-#################################################################################################################
-# Tengo que crear un id para cada bola y hacer una función (en Game) de añadir bolas tal que reciba el último "id"
-# De ahí podemos mapear los casos con el id de la bola y luego
-#  - cambiar color
-#  - rebotar (tal dirección)
-#  - bloque especial
-#################################################################################################################
-
-        # colisiones BOLA - PALA
+        # Colisiones BOLA - PALA
         for ball, paddles in pygame.sprite.groupcollide(self.game.balls, self.game.paddles, False, False).items():
             paddle = paddles[0]
             if ball.color != paddle.color:
                 ball.change_color()
-            ball.collide_player() 
+                changes.append(f"ball-{ball.id}-cc")
+            ball.collide_player()
+            changes.append(f"ball-{ball.id}-c1")
         
         # colisiones BOLA - BLOQUE
         for ball, blocks in pygame.sprite.groupcollide(self.game.balls, self.game.blocks, False, False).items():
-            block = blocks[0]
-            if ball.color == block.color:
-                block.get_shot()
+            block = blocks[0] # una bola solo puede chocar con un bloque a la vez  
             AXIS = Y if ((abs(block.rect.top - ball.rect.bottom) < block.rect.width*0.1)
                             or (abs(block.rect.bottom - ball.rect.top) < block.rect.width*0.1)) else X
             ball.collide_player(AXIS)
+            changes.append(f"ball-{ball.id}-c{AXIS}")
+            if ball.color == block.color:
+                block.get_shot()
+                changes.append(f"block-{block.id}-gs")
 
         # colisiones BOLA - BLOQUE_ESPECIAL 
         for ball, blocks in pygame.sprite.groupcollide(self.game.balls, self.game.blocks_new_balls, False, True).items():
-            for block in blocks:
-                AXIS = Y if ((abs(block.rect.top - ball.rect.bottom) < block.rect.width*0.1)
-                                or (abs(block.rect.bottom - ball.rect.top) < block.rect.width*0.1)) else X
-                ball.collide_player(AXIS)
-                self.game.add_new_balls(n=3)
+            block = blocks[0] # una bola solo puede chocar con un bloque a la vez  
+            AXIS = Y if ((abs(block.rect.top - ball.rect.bottom) < block.rect.width*0.1)
+                            or (abs(block.rect.bottom - ball.rect.top) < block.rect.width*0.1)) else X
+            ball.collide_player(AXIS)
+            changes.append(f"ball-{ball.id}-c{AXIS}")
+            self.id_ball = self.game.add_new_balls(n=3, id=self.id_ball)
+            changes.append(f"be-0-3")
 
         self.game.all_sprites.update()
 
@@ -75,19 +89,24 @@ class Sala():
 
 
 def get_player_events(sala, conn, side):
-    command = ""
+    command = conn.recv()
     events = []
     while command != "next":
-        command = conn.recv()
         events.append(command)
         if command == "left":
-            print(side)
             sala.game.moveLeft(PLAYERS[side])
         elif command == "right":
             sala.game.moveRight(PLAYERS[side])
         elif command == "quit":
             sala.game.stop()
+        command = conn.recv()
     return events
+
+
+def send_events(events, conn):
+    for ev in events:
+        conn.send(ev)
+    conn.send("next")
 
 
 def play(conn1, conn2):
@@ -106,28 +125,25 @@ def play(conn1, conn2):
         # bucle de juego
         while sala.game.is_running():
 
-            # crear bloque especial pasados X (= 3) segundos 
-            if not r and time.time() - init > 3:
-                b = BlockNewBalls(((SIZE[0]-BLOCK_SIZE[0])//2, (SIZE[1]-BLOCK_SIZE[1])//2))
-                sala.game.blocks_new_balls.add(b)
-                sala.game.all_sprites.add(b)
-                r = True
+            # # crear bloque especial pasados X (= 3) segundos 
+            # if not r and time.time() - init > 3:
+            #     b = BlockNewBalls(((SIZE[0]-BLOCK_SIZE[0])//2, (SIZE[1]-BLOCK_SIZE[1])//2))
+            #     sala.game.blocks_new_balls.add(b)
+            #     sala.game.all_sprites.add(b)
+            #     r = True
 
             # checkear los eventos de los jugadores
             player_events_1 = get_player_events(sala, conn1, 0)
-            conn2.send(player_events_1)
             player_events_2 = get_player_events(sala, conn2, 1)
-            conn1.send(player_events_2)
-
-            # realizar los movimientos del juego
-            sala.game.movements()
+            send_events(player_events_1, conn2)
+            send_events(player_events_2, conn1)
 
             # analizar los cambios de la sala
             changes = sala.analyze_events()
 
             # enviar datos actualizados
-            conn1.send(changes)
-            conn2.send(changes)
+            send_events(changes, conn1)
+            send_events(changes, conn2)
 
     except:
         traceback.print_exc()
@@ -161,6 +177,3 @@ if __name__=='__main__':
         ip_address = sys.argv[1]
 
     main(ip_address)
-
-if __name__=="__main__":
-    main()
