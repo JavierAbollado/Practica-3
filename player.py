@@ -1,11 +1,10 @@
 from multiprocessing.connection import Client
 import traceback
 import pygame
-import numpy as np
-import sys, os, time
+import sys, random
 
 from constantes import *
-from sprites import Game, GameOver, LevelComplete, BlockNewBalls
+from sprites import Game, Ball, GameOver, LevelComplete, BlockNewBalls
 
 SIDES = ["left", "right"]
 SIDESSTR = ["left", "right"]
@@ -20,14 +19,35 @@ class Player_Display():
         self.side = side
         self.other_side = 1 - side
         self.game = Game()
+        self.id_ball = self.game.add_new_balls(n=2, id=0)
         self.gameover = GameOver()
         self.levelcompleted = LevelComplete()
+
+        # crear diccionarios para que los cambios recibidos por la sala sean más fáciles de ejecutar 
+        # Obs: las claves van a ser los "id" de cada objeto
+        self.dict_blocks = dict()
+        for block in self.game.blocks:
+            self.dict_blocks[block.id] = block
+        self.dict_balls = dict()
+        for ball in self.game.balls:
+            self.dict_balls[ball.id] = ball
 
         # display
         self.quit = False
         self.screen = pygame.display.set_mode(SIZE)
         self.clock =  pygame.time.Clock()  #FPS
         pygame.init()
+
+    def is_running(self):
+        return not self.quit
+
+    def add_new_balls(self, n, id):
+        for i in range(n):
+            ball = Ball([BALL_VEL[0] * (-1)**random.randint(0,1), -BALL_VEL[1]], color=random.randint(0,1), id=id+i)
+            self.dict_balls[ball.id] = ball
+            self.game.balls.add(ball)
+            self.game.all_sprites.add(ball)
+        return id + n
 
     # Checkear solamente los movimientos de nuestra paleta (y el "quit")
     def analyze_events(self):
@@ -38,7 +58,7 @@ class Player_Display():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 events.append("quit")
-                self.stop()
+                self.game.stop()
         
         # mover palas
         keys = pygame.key.get_pressed()
@@ -54,7 +74,55 @@ class Player_Display():
     # Actualizar las posiciones del juego según los nuevos cambios en la sala
     # "changes" es una lista de strings
     def update_from_sala(self, changes):
-        pass
+
+        ####################################################################
+        # Formato de los códigos: "x1-x2-x3"
+        #
+        # donde,
+        #    x1 = nombre del objeto afectado: ball, block, be
+        #    x2 = id del objeto
+        #    x3 = código de la acción a realizar
+        #
+        # códigos del x3 para cada objeto:
+        #    ball:
+        #       cc = change color
+        #       c{X} = collide, con AXIS = X
+        #    block:
+        #       gs = get shot
+        #    be:
+        #       nº = nº de bolas a generar
+        ####################################################################
+
+        for change in changes:
+
+            l = change.split("-")
+            name, id, code = l[0], int(l[1]), l[2]
+            print(l)
+
+            if name == "ball":
+                print("ball event")
+                if code == "cc":
+                    self.dict_balls[id].change_color()
+                elif code[-1] == "0":
+                    self.dict_balls[id].collide_player(AXIS=0)
+                elif code[-1] == "1":
+                    self.dict_balls[id].collide_player(AXIS=1)
+                else:
+                    print("Codigo ", code, " no conocido!")
+
+            elif name == "block":
+                print("block event")
+                if code == "gs":
+                    self.dict_blocks[id].get_shot()
+                else:
+                    print("Codigo ", code, " no conocido!")
+
+            elif name == "be":
+                self.id_ball = self.add_new_balls(n=int(code), id=self.id_ball)
+
+            else:
+                print("Codigo ", code, " no conocido!")
+
     
     # Actualizar las posiciones del juego según los nuevos cambios del otro jugador
     # "changes" es una lista de strings
@@ -81,12 +149,26 @@ class Player_Display():
         else:
             self.screen.blit(IM_background, (0, 0))
             self.game.all_sprites.draw(self.screen)
-        self.window.blit(self.screen, (0,0))
         pygame.display.flip()
         self.tick()
 
     def tick(self):
         self.clock.tick(FPS)
+
+
+def send_events(events, conn):
+    for ev in events:
+        conn.send(ev)
+    conn.send("next")
+
+
+def receive_events(conn):
+    events = []
+    ev = conn.recv()
+    while ev != "next":
+        events.append(ev)
+        ev = conn.recv()
+    return events
 
 
 def main(ip_address):
@@ -105,16 +187,14 @@ def main(ip_address):
 
                 # analizar (y enviar a la sala) mis movimientos
                 events = myDisplay.analyze_events()
-                for ev in events:
-                    conn.send(ev)
-                conn.send("next")
+                send_events(events, conn)
                 
                 # recibir los cambios del otro jugador
-                player_changes = conn.recv()
+                player_changes = receive_events(conn)
                 myDisplay.update_from_player(player_changes)
                 
                 # recibir los cambios de la sala
-                changes = conn.recv()
+                changes = receive_events(conn)
                 myDisplay.update_from_sala(changes)
                 
                 # actualizar pantalla
