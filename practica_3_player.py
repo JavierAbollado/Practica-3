@@ -314,7 +314,7 @@ class Display():
 
         self.screen = pygame.display.set_mode(SIZE)
         self.clock =  pygame.time.Clock()  #FPS
-        self.background = pygame.image.load('background.png')
+        self.background = pygame.image.load("images/background.png")
         pygame.init()
 
     def analyze_events(self, side: int):
