@@ -57,6 +57,7 @@ SIDES = ["left", "right"]
 
 from multiprocessing.connection import Listener
 from multiprocessing import Process, Manager, Value, Lock
+import random
 import traceback
 import sys
 
@@ -148,9 +149,17 @@ class Game():
         self.block_lives = manager.dict()
         self.ball_info = manager.dict()
         # Cambiar esto por el numero correcto
-        for i in range(12):
+        for i in range(24):
+            rand_color = random.randint(0,1)
             # Es dos la vida inicial de un bloque?
-            self.block_lives[i] = (2, i%2, [600 + 40*(i%2), 20 + 40*i])
+            if i < 12:
+                self.block_lives[i] = (2, rand_color%2
+                                       , [600 + 40*(i%2)
+                                       , 20 + 40*i])
+            else:
+                self.block_lives[i] = (2, rand_color%2
+                                       , [600 + 40*((1+(i%12))%2)
+                                       , 20 + 40*(i%12)])
         
         for i in range(len(list(self.ball_s))):
             self.ball_info[i] = (1, self.ball_s[i].color
@@ -255,14 +264,9 @@ class Game():
         # ball_c = 1
         # self.ball_s[ball_index].color  = ball_c
         self.lock.release()
+    
         
-    # def colors_not_changed(self, ball_index: int):
-    #     self.lock.acquire()
-    #     ball_c = self.ball_s[ball_index].color
-    #     ball_c = 0
-    #     self.ball_s[ball_index].color = ball_c
-    #     self.lock.release()
-    # OK, revisar si falta mas informacion
+
     def get_info(self):
         info = {
 
@@ -319,7 +323,7 @@ def player(side: int, conn, game):
                 # collide_b_b_X_Y_Z
                 # X: jugador(side) Y: ball_index , Z : block_index
                 # Supongamos la existencia de una constante inicial NBLOQUES
-                NBLOQUES = 12 #MOVER A GLOBAL
+                NBLOQUES = 24 #MOVER A GLOBAL
                 for termination in [str(side) + "_" + str(i) + "_" + str(j) 
                                     for i in range(2)
                                     for j in range(NBLOQUES)]:

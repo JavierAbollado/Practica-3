@@ -113,9 +113,13 @@ class Block():
     def __init__(self, block_id: int, color: int):
         # self.pos=[ None, None ] 
         # DEBUGGING
-        self.pos      = [600 + 40*(block_id%2), 20 + 40*block_id]
-        self.color    = color
-        self.vidas    = 2
+        if block_id < 12:
+            self.pos      = [600 + 40*(block_id%2), 20 + 40*block_id]
+        else:
+            self.pos      = [600 + 40*((1+(block_id%12))%2)
+                             , 20 + 40*(block_id%12)]
+        self.color    = None
+        self.vidas    = None
         self.block_id = block_id
 
     def get_pos(self):
@@ -141,7 +145,8 @@ class Game():
     def __init__(self):
         self.players = [Player(i) for i in range(2)]
         self.balls   = [Ball(i,i) for i in range(2)]
-        self.blocks  = [Block(i, i%2) for i in range(12)]
+        self.blocks  = [Block(i, i%2) for i in range(12)] \
+                        + [Block(i, 0) for i in range(12, 24)]
         self.score   = [0,0]
         self.running = True
 
@@ -191,7 +196,7 @@ class Game():
             # if self.balls_dict[i][1] == 1:
             #     self.balls[i].set_color((1-self.balls[i].get_color())%2)
         self.bloques_dict=(gameinfo['bloques_dict'])
-        for i in range(12):
+        for i in range(24):
 
             self.blocks[i].set_vidas(self.blocks_dict[i][0])
             self.blocks[i].set_color(self.blocks_dict[i][1])
@@ -260,9 +265,10 @@ class BlockSprite(pygame.sprite.Sprite):
         super().__init__()
         self.block=block
         if block.color == 0:
-            self.color = BLUE_1
+               self.color = BLUE_1
         else:
-            self.color = RED_1
+                self.color = RED_1
+            
         self.pos = block.pos
         self.image = pygame.Surface(BLOCK_SIZE)
         self.image.fill(BLACK)
@@ -275,9 +281,26 @@ class BlockSprite(pygame.sprite.Sprite):
    
 
     def update(self):
+        local_color = self.color
         if self.block.vidas == 0:
             self.kill()
+            
+        if self.block.color == 0 and self.block.vidas == 1:
+            self.color = BLUE_2
+
         
+        if self.block.color == 1 and self.block.vidas == 1:
+            self.color = RED_2
+
+        if local_color != self.color:
+            pygame.draw.rect(self.image, self.color, [0, 0, BLOCK_SIZE[0]
+                                                          , BLOCK_SIZE[1]])
+            self.rect = self.image.get_rect()
+            self.rect.left, self.rect.top = self.pos
+                
+        #     self.color = RED_1
+        # if self.block.color == 1 and self.block.vidas == 1:
+        #     self.color = BLUE_1
         pass
 
 
@@ -286,7 +309,7 @@ class Display():
     def __init__(self, game, side: int):
         self.quit = False
         self.game = game
-        self.list_blocks=[i for i in range(12)]
+        self.list_blocks=[i for i in range(24)]
         self.list_balls=[i for i in range(2)]
 
         # sprite groups
