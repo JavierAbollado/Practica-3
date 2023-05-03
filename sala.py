@@ -17,6 +17,7 @@ class Sala():
         # game
         self.game = Game()
         self.id_ball = self.game.add_new_balls(n=2, id=0)
+        self.id_especial_blocks = 0
 
         # display
         self.quit = False
@@ -74,14 +75,15 @@ class Sala():
                 changes.append(f"block-{block.id}-gs")
 
         # colisiones BOLA - BLOQUE_ESPECIAL 
-        for ball, blocks in pygame.sprite.groupcollide(self.game.balls, self.game.blocks_new_balls, False, True).items():
+        for ball, blocks in pygame.sprite.groupcollide(self.game.balls, self.game.blocks_new_balls, False, False).items():
             block = blocks[0] # una bola solo puede chocar con un bloque a la vez  
             AXIS = Y if ((abs(block.rect.top - ball.rect.bottom) < block.rect.width*0.1)
                             or (abs(block.rect.bottom - ball.rect.top) < block.rect.width*0.1)) else X
             ball.collide_player(AXIS)
             changes.append(f"ball-{ball.id}-c{AXIS}")
             self.id_ball = self.game.add_new_balls(n=3, id=self.id_ball)
-            changes.append(f"be-0-3")
+            block.get_shot()
+            changes.append(f"be-{block.id}-gs")
 
         self.game.all_sprites.update()
 
@@ -128,12 +130,15 @@ def play(conn1, conn2):
         # bucle de juego
         while sala.game.is_running():
 
-            # # crear bloque especial pasados X (= 3) segundos 
-            # if not r and time.time() - init > 3:
-            #     b = BlockNewBalls(((SIZE[0]-BLOCK_SIZE[0])//2, (SIZE[1]-BLOCK_SIZE[1])//2))
-            #     sala.game.blocks_new_balls.add(b)
-            #     sala.game.all_sprites.add(b)
-            #     r = True
+            temp = []  # eventos temporales
+
+            # crear bloque especial cada X segundos (si no hay otros)
+            X = 5
+            if time.time() - init > X and len(sala.game.blocks_new_balls) == 0:
+                sala.game.add_blocknewballs(sala.id_especial_blocks)
+                sala.id_especial_blocks += 1
+                init = time.time()
+                temp.append("new-be")
 
             # checkear los eventos de los jugadores
             player_events_1 = get_player_events(sala, conn1, 0)
@@ -142,7 +147,7 @@ def play(conn1, conn2):
             send_events(player_events_2, conn1)
 
             # analizar los cambios de la sala
-            changes = sala.analyze_events()
+            changes = temp + sala.analyze_events()
 
             # enviar datos actualizados
             send_events(changes, conn1)
