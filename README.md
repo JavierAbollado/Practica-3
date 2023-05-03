@@ -1,5 +1,7 @@
 # Versión 3 - Multijugador
 
+Lo mismo que *sala_control*, pero voy a hacer cambios en el send para mejorar la velocidad.
+
  - Es funcional.
  - Gráficos de la versión 3 del main. 
  - Es una prueba de mantener una sala main, y los jugadores únicamente controlan el movimiento de sus paletas.
