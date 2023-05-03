@@ -51,6 +51,8 @@ class Ball(pygame.sprite.Sprite):
     def __init__(self, velocity, color, pos, id):
         super().__init__()
 
+        print("Ball", id)
+
         self.velocity = velocity
         self.color = color
         self.id = id
@@ -104,7 +106,7 @@ class Block(pygame.sprite.Sprite):
         # así inicializamos una secuencia de nº aleatorios fija con "seed(id)".
         random.seed(self.id)
         self.color = random.randint(0,1) # 2 colores € {0,1}
-        self.level = random.randint(0,3) # X niveles € {0,1,...}
+        self.level = random.randint(0,1) # X niveles € {0,1,...}
         
         # gráficos del bloque
         self.image = pygame.Surface(BLOCK_SIZE)
@@ -127,14 +129,22 @@ class Block(pygame.sprite.Sprite):
 
 class BlockNewBalls(pygame.sprite.Sprite): 
        
-    def __init__(self, pos): 
+    def __init__(self, pos, id): 
         super().__init__()
+        self.id = id
         self.pos = pos
+        self.level = 0
         self.image = pygame.Surface(BLOCK_SIZE)
         self.image.fill(BLACK)
         self.image.blit(IM_block_new_balls, (0.1*BLOCK_SIZE[0], 0.1*BLOCK_SIZE[1]))
         self.rect = self.image.get_rect()
         self.rect.left, self.rect.top = pos
+        
+    def get_shot(self):
+        if self.level == 0:
+            super().kill()
+        else:
+            self.level -= 1
 
 class GameOver(pygame.sprite.Sprite):
     def __init__(self):
@@ -183,8 +193,9 @@ class Game:
         while 0.1*SIZE[0] + (j+1)*BLOCK_SIZE[0] < 0.9*SIZE[0]:
             i = 0
             while 0.1*SIZE[1] + (i+1)*BLOCK_SIZE[1] < 0.25*SIZE[1]:
-                block = Block((0.1*SIZE[0] + j*BLOCK_SIZE[0], 0.1*SIZE[1] + i*BLOCK_SIZE[1]), id=id_block)
-                self.blocks.add(block)
+                if id_block % 1 == 0:
+                    block = Block((0.1*SIZE[0] + j*BLOCK_SIZE[0], 0.1*SIZE[1] + i*BLOCK_SIZE[1]), id=id_block)
+                    self.blocks.add(block)
                 id_block += 1
                 i += 1
             j += 1
@@ -215,6 +226,12 @@ class Game:
             self.balls.add(ball)
             self.all_sprites.add(ball)
         return id + n
+    
+    # añadir bloque especial al juego (si chocan con el aparecen más bolas)
+    def add_blocknewballs(self, id):
+        b = BlockNewBalls(id=id, pos=((SIZE[0]-BLOCK_SIZE[0])//2, (SIZE[1]-BLOCK_SIZE[1])//2))
+        self.blocks_new_balls.add(b)
+        self.all_sprites.add(b)
 
     def get_player(self, side):
         return self.players[side]
