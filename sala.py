@@ -89,24 +89,27 @@ class Sala():
 
 
 def get_player_events(sala, conn, side):
-    command = conn.recv()
-    events = []
-    while command != "next":
-        events.append(command)
+    # command = conn.recv()
+    events = conn.recv()
+    # events = []
+    # while command != "next":
+    for command in events:
+        # events.append(command)
         if command == "left":
             sala.game.moveLeft(PLAYERS[side])
         elif command == "right":
             sala.game.moveRight(PLAYERS[side])
         elif command == "quit":
             sala.game.stop()
-        command = conn.recv()
+        # ommand = conn.recv()
     return events
 
 
 def send_events(events, conn):
-    for ev in events:
-        conn.send(ev)
-    conn.send("next")
+    conn.send(events)
+    #for ev in events:
+    #    conn.send(ev)
+    #conn.send("next")
 
 
 def play(conn1, conn2):
