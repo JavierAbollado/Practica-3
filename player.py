@@ -157,17 +157,19 @@ class Player_Display():
 
 
 def send_events(events, conn):
-    for ev in events:
-        conn.send(ev)
-    conn.send("next")
+    # for ev in events:
+    #    conn.send(ev)
+    #conn.send("next")
+    conn.send(events)
 
 
 def receive_events(conn):
-    events = []
-    ev = conn.recv()
-    while ev != "next":
-        events.append(ev)
-        ev = conn.recv()
+    # events = []
+    # ev = conn.recv()
+    events = conn.recv()
+    #while ev != "next":
+    #    events.append(ev)
+    #    ev = conn.recv()
     return events
 
 
