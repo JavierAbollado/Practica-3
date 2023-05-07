@@ -1,8 +1,3 @@
-"""
-mirar los bibujos bien (sprites)
-
-"""
-
 from multiprocessing.connection import Client
 import traceback
 import pygame
@@ -23,7 +18,7 @@ RED_1 = (255, 0, 0)
 RED_2 = (120, 0, 0)
 
 COLORS_BLOCK = [[RED_1, RED_2], [BLUE_1, BLUE_2]]
-PLAYER_COLOR = [YELLOW, BLUE]
+PLAYER_COLOR = [RED_1, BLUE]
 
 # ejes
 X = 0
@@ -33,8 +28,8 @@ SIZE = (700, 525)
 # player 
 LEFT_PLAYER = 0
 RIGHT_PLAYER = 1
-PLAYER_HEIGHT = 60
-PLAYER_WIDTH = 10
+PLAYER_HEIGHT = 10
+PLAYER_WIDTH = 60
 PLAYER_SIZE = (PLAYER_HEIGHT, PLAYER_WIDTH)
 
 # ball & block
@@ -58,7 +53,7 @@ load_rotate_image = lambda file_name, size, angle : pygame.transform.scale(pygam
 IM_background = load_image("blackbackground.png", SIZE)
 IM_gameover = load_image("gameover.png", (SIZE[0]//2, SIZE[1]//5))
 IM_block = [[load_image(f"rojo{i+1}.png", (10*BLOCK_SIZE[0]//8, 10*BLOCK_SIZE[1]//8)) for i in range(4)], [load_image(f"azul{i+1}.png", (10*BLOCK_SIZE[0]//8, 10*BLOCK_SIZE[1]//8)) for i in range(4)]]
-IM_player = [load_rotate_image(name, PLAYER_SIZE, 270) for name in ["paleta_roja.png", "paleta_azul.png"]]
+IM_player = [load_rotate_image(name, PLAYER_SIZE, 0) for name in ["paleta_roja.png", "paleta_azul.png"]]
 
 
 class Player():
@@ -214,17 +209,18 @@ class Game():
         return f"G<{self.players[RIGHT_PLAYER]}:{self.players[LEFT_PLAYER]}:{self.ball}>"
 
 
+
 class Paddle(pygame.sprite.Sprite):
     def __init__(self, player):
       super().__init__()
-      self.image = pygame.Surface([PLAYER_WIDTH, PLAYER_HEIGHT])
-      self.image.fill(BLACK)
-      self.image.set_colorkey(BLACK)#drawing the paddle
       self.player = player
-      color = PLAYER_COLOR[self.player.get_side()]
-      pygame.draw.rect(self.image, color, [0,0,PLAYER_WIDTH, PLAYER_HEIGHT])
+      self.color = self.player.side
+      self.image = IM_player[self.color]
       self.rect = self.image.get_rect()
       self.update()
+
+
+
 
     def update(self):
         pos = self.player.get_pos()
@@ -271,9 +267,10 @@ class BlockSprite(pygame.sprite.Sprite):
             
         self.pos = block.pos
         self.image = pygame.Surface(BLOCK_SIZE)
-        self.image.fill(BLACK)
-        pygame.draw.rect(self.image, self.color, [0, 0, BLOCK_SIZE[0]
-                                                  , BLOCK_SIZE[1]])
+        self.image.fill(self.color)
+        pygame.draw.rect(self.image, BLACK, [0, 0, BLOCK_SIZE[0]
+                                                  , BLOCK_SIZE[1]]
+                                                  , 1)
         self.rect = self.image.get_rect()
         self.rect.left, self.rect.top = self.pos
         self.update()
@@ -293,8 +290,10 @@ class BlockSprite(pygame.sprite.Sprite):
             self.color = RED_2
 
         if local_color != self.color:
-            pygame.draw.rect(self.image, self.color, [0, 0, BLOCK_SIZE[0]
-                                                          , BLOCK_SIZE[1]])
+            self.image.fill(self.color)
+            pygame.draw.rect(self.image, BLACK, [0, 0, BLOCK_SIZE[0]
+                                                          , BLOCK_SIZE[1]]
+                                                          , 1)
             self.rect = self.image.get_rect()
             self.rect.left, self.rect.top = self.pos
                 
@@ -337,7 +336,7 @@ class Display():
 
         self.screen = pygame.display.set_mode(SIZE)
         self.clock =  pygame.time.Clock()  #FPS
-        self.background = pygame.image.load("images/background.png")
+        self.background = pygame.image.load("images/fondo_3.jpg")
         pygame.init()
 
     def analyze_events(self, side: int):
@@ -392,12 +391,7 @@ class Display():
             ball_id  = ball.ball.ball_id
             # Ok
             color    = ball.ball.color
-            # Error
-            # block    = blocks.block
             block_id = blocks[0].block.block_id
-            # if color!=side:, la colision se produce siempre!
-            # Obs: ahora no mueren los bloques
-            # !!!!
             if side == ball_id:
                 event= "collide_b_b_" + str(side) + "_" + str(ball_id) +\
                     "_" + str(block_id)
@@ -409,12 +403,6 @@ class Display():
     def refresh(self):
         self.all_sprites.update()
         self.screen.blit(self.background, (0, 0))
-        score = self.game.get_score()
-        font = pygame.font.Font(None, 74)
-        text = font.render(f"{score[LEFT_PLAYER]}", 1, WHITE)
-        self.screen.blit(text, (250, 10))
-        text = font.render(f"{score[RIGHT_PLAYER]}", 1, WHITE)
-        self.screen.blit(text, (SIZE[X]-250, 10))
         self.all_sprites.draw(self.screen)
         pygame.display.flip()
 
