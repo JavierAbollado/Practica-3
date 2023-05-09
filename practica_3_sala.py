@@ -1,12 +1,6 @@
 
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Sun Apr  2 20:14:46 2023
-
-@author: davidp
-"""
-
 # colores
 BLACK = (0, 0, 0)
 GREY = (50,50,50)
