@@ -1,14 +1,6 @@
 
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Sun Apr  2 20:14:46 2023
-
-@author: davidp
-"""
-
-
-
 from multiprocessing.connection import Listener
 from multiprocessing import Process, Manager, Value, Lock
 import random
