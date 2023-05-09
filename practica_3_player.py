@@ -3,57 +3,7 @@ import traceback
 import pygame
 import random
 import sys, os
-# colores
-BLACK = (0, 0, 0)
-GREY = (50,50,50)
-WHITE = (255, 255, 255)
-RED = (255, 0, 0)
-BLUE = (0, 0, 255)
-YELLOW = (255,255,0)
-GREEN = (0,255,0)
-
-BLUE_1 = (0, 50, 255)
-BLUE_2 = (0, 0, 75)
-RED_1 = (255, 0, 0)
-RED_2 = (120, 0, 0)
-
-COLORS_BLOCK = [[RED_1, RED_2], [BLUE_1, BLUE_2]]
-PLAYER_COLOR = [RED_1, BLUE]
-
-# ejes
-X = 0
-Y = 1
-SIZE = (700, 525)
-
-# player 
-LEFT_PLAYER = 0
-RIGHT_PLAYER = 1
-PLAYER_HEIGHT = 10
-PLAYER_WIDTH = 60
-PLAYER_SIZE = (PLAYER_HEIGHT, PLAYER_WIDTH)
-
-# ball & block
-BALL_COLOR = WHITE
-BALL_SIZE = 12
-BLOCK_SIZE =[40,40]
-FPS = 60
-DELTA = 5 #30
-VEL_BALL_X, VEL_BALL_Y = 1, 1 # velocidad de la bola
-
-SIDES = ["left", "right"]
-
-
-SIDESSTR = ["left", "right"]
-
-
-# images
-load_image = lambda file_name, size : pygame.transform.scale(pygame.image.load(os.path.join("images", file_name)), size)
-load_rotate_image = lambda file_name, size, angle : pygame.transform.scale(pygame.transform.rotate(pygame.image.load(os.path.join("images", file_name)), angle), size)
-
-IM_background = load_image("blackbackground.png", SIZE)
-IM_gameover = load_image("gameover.png", (SIZE[0]//2, SIZE[1]//5))
-IM_block = [[load_image(f"rojo{i+1}.png", (10*BLOCK_SIZE[0]//8, 10*BLOCK_SIZE[1]//8)) for i in range(4)], [load_image(f"azul{i+1}.png", (10*BLOCK_SIZE[0]//8, 10*BLOCK_SIZE[1]//8)) for i in range(4)]]
-IM_player = [load_rotate_image(name, PLAYER_SIZE, 0) for name in ["paleta_roja.png", "paleta_azul.png"]]
+from constantes import *
 
 
 class Player():
@@ -61,8 +11,6 @@ class Player():
     def __init__(self, side: int):
         self.side = side
         self.pos  = [0,0]
-        # self.pos = [None, None]
-        # DEBUGGING
 
     def get_pos(self):
         return self.pos
@@ -78,22 +26,20 @@ class Player():
 
 class Ball():
     def __init__(self, ball_id: int, color: int):
-        # self.pos=[ None, None ]
-        # DEBUGGING
-        self.color   = color 
+        self.color   = color
         self.pos     = [None, None]
         self.ball_id = ball_id
         self.status = 1
 
     def get_pos(self):
         return self.pos
-    
+
     def set_status(self, status):
         self.status = status
 
     def set_pos(self, pos):
         self.pos = pos
-        
+
     def get_color(self):
         return self.color
 
@@ -102,12 +48,10 @@ class Ball():
 
     def __str__(self):
         return f"B<{self.pos}>"
-    
-    
+
+
 class Block():
     def __init__(self, block_id: int, color: int):
-        # self.pos=[ None, None ] 
-        # DEBUGGING
         if block_id < 12:
             self.pos      = [600 + 40*(block_id%2), 20 + 40*block_id]
         else:
@@ -122,10 +66,10 @@ class Block():
 
     def set_pos(self, pos):
         self.pos = pos
-        
+
     def set_vidas(self, vidas):
         self.vidas = vidas
-        
+
     def get_color(self):
         return self.color
 
@@ -142,7 +86,6 @@ class Game():
         self.balls   = [Ball(i,i) for i in range(2)]
         self.blocks  = [Block(i, i%2) for i in range(12)] \
                         + [Block(i, 0) for i in range(12, 24)]
-        self.score   = [0,0]
         self.running = True
 
     def get_player(self, side: int):
@@ -150,54 +93,59 @@ class Game():
 
     def set_pos_player(self, side: int, pos):
         self.players[side].set_pos(pos)
-        
+
 
     def get_ball(self,ball_id):
         return self.balls[ball_id]
 
-    
+
     def get_block(self, block_id: int):
         return self.blocks[block_id]
-    
+
     def set_block_vida(self, block_id: int, vida):
         self.blocks[block_id].set_vida(vida)
 
     def set_ball_pos(self, ball_id: int, pos):
         self.balls[ball_id].set_pos(pos)
 
-    def get_score(self):
-        return self.score
-
-    def set_score(self, score):
-        self.score = score
-
 
     def update(self, gameinfo):
+        """
+        
+
+        Parameters
+        ----------
+        gameinfo : Dict
+            Recibe toda la informacion del analisis de evento de sala.
+
+        Actualiza el sprite de forma que:
+            Le da su nueva posicion
+            Le da su posible nuevo color
+            Le da su posible nuevo eje
+            Actualiza las vidas de los bloques
+                Los colores de los bloques depende de las vidas que le mandan
+            
+        -------
+        None.
+
+        """
         self.set_pos_player(LEFT_PLAYER, gameinfo['pos_left_player'])
         self.set_pos_player(RIGHT_PLAYER, gameinfo['pos_right_player'])
-        self.set_score(gameinfo['score'])
         self.running = gameinfo['is_running']
         self.balls_dict=(gameinfo['balls_dict'])
         self.blocks_dict = gameinfo['bloques_dict']
         for i in range(2):
 
-            # Solucion:
-            # Nueva posicion bolas
             self.balls[i].set_pos(self.balls_dict[i][2])
             self.balls[i].set_status(self.balls_dict[i][0])
             self.balls[i].set_color(self.balls_dict[i][1])
             # Color bolas, si hay que hacer cambio (val = 1)
             # Alternamos el color
-            # if self.balls_dict[i][1] == 1:
-            #     self.balls[i].set_color((1-self.balls[i].get_color())%2)
         self.bloques_dict=(gameinfo['bloques_dict'])
         for i in range(24):
 
             self.blocks[i].set_vidas(self.blocks_dict[i][0])
             self.blocks[i].set_color(self.blocks_dict[i][1])
-            
-            
-        
 
     def is_running(self):
         return self.running
@@ -212,13 +160,12 @@ class Game():
 
 class Paddle(pygame.sprite.Sprite):
     def __init__(self, player):
-      super().__init__()
-      self.player = player
-      self.color = self.player.side
-      self.image = IM_player[self.color]
-      self.rect = self.image.get_rect()
-      self.update()
-
+        super().__init__()
+        self.player = player
+        self.color = self.player.side
+        self.image = IM_player[self.color]
+        self.rect = self.image.get_rect()
+        self.update()
 
 
 
@@ -253,10 +200,8 @@ class BallSprite(pygame.sprite.Sprite):
                                , BALL_SIZE//2)
             pos = self.ball.get_pos()
             (self.rect.centerx, self.rect.centery) = pos
-        
-        
-        
-class BlockSprite(pygame.sprite.Sprite):    
+
+class BlockSprite(pygame.sprite.Sprite):
     def __init__(self, block):  # color € {0,1} -> rojo y azul
         super().__init__()
         self.block=block
@@ -264,7 +209,7 @@ class BlockSprite(pygame.sprite.Sprite):
                self.color = BLUE_1
         else:
                 self.color = RED_1
-            
+
         self.pos = block.pos
         self.image = pygame.Surface(BLOCK_SIZE)
         self.image.fill(self.color)
@@ -275,17 +220,21 @@ class BlockSprite(pygame.sprite.Sprite):
         self.rect.left, self.rect.top = self.pos
         self.update()
 
-   
 
     def update(self):
+        """
+        Los colores de los bloques cambian en funcion de las vidas que les
+        manda sala.
+
+        """
         local_color = self.color
         if self.block.vidas == 0:
             self.kill()
-            
+
         if self.block.color == 0 and self.block.vidas == 1:
             self.color = BLUE_2
 
-        
+
         if self.block.color == 1 and self.block.vidas == 1:
             self.color = RED_2
 
@@ -296,39 +245,33 @@ class BlockSprite(pygame.sprite.Sprite):
                                                           , 1)
             self.rect = self.image.get_rect()
             self.rect.left, self.rect.top = self.pos
-                
-        #     self.color = RED_1
-        # if self.block.color == 1 and self.block.vidas == 1:
-        #     self.color = BLUE_1
-        pass
 
 
 
 class Display():
     def __init__(self, game, side: int):
-        self.quit = False
-        self.game = game
-        self.list_blocks=[i for i in range(24)]
-        self.list_balls=[i for i in range(2)]
+        self.quit        = False
+        self.game        = game
+        self.list_blocks = list(range(24))
+        self.list_balls  = list(range(2))
 
         # sprite groups
         self.paddles = pygame.sprite.Group()
-        self.balls = pygame.sprite.Group()
-        self.blocks = pygame.sprite.Group()
+        self.balls   = pygame.sprite.Group()
+        self.blocks  = pygame.sprite.Group()
 
         # añadir sprites
         for padlle in [Paddle(self.game.get_player(i)) for i in range(2)]:
             self.paddles.add(padlle)
-        
+
         for ball in [BallSprite(self.game.get_ball(i))
                      for i in self.list_balls]:
             self.balls.add(ball)
-            
-        
+
+
         for block in [BlockSprite(self.game.get_block(i))
                       for i in self.list_blocks]:
-            self.blocks.add(block) 
-        
+            self.blocks.add(block)
         self.all_sprites = pygame.sprite.Group()
         self.all_sprites.add(self.paddles)
         self.all_sprites.add(self.balls)
@@ -362,41 +305,36 @@ class Display():
                         events.append("down")
                 elif event.type == pygame.QUIT:
                     events.append("quit")
-            
 
-        
-        # colisiones BOLA - PALA      
+
+
+        # colisiones BOLA - PALA
         for ball, paddle in pygame.sprite.groupcollide(self.balls
                                                        , self.paddles
                                                        , False
                                                        , False).items():
-            print(paddle)
             ball_id=ball.ball_id
             color=ball.ball.color
-            # Una de las dos no funciona bien, por que?
-            print(paddle)
-            
+
             side_info = str(paddle[0].player.get_side())
             if side_info == str(side):
                 event= "collide_p_b_" + side_info + "_" + str(ball_id)
                 events.append(event)
-  
-        
+
+
         # colisiones BOLA - bloques
         for ball, blocks in pygame.sprite.groupcollide(self.balls
                                                        , self.blocks
                                                        , False
                                                        , False).items():
-            # OK
             ball_id  = ball.ball.ball_id
-            # Ok
             color    = ball.ball.color
             block_id = blocks[0].block.block_id
             if side == ball_id:
-                event= "collide_b_b_" + str(side) + "_" + str(ball_id) +\
+                event = "collide_b_b_" + str(side) + "_" + str(ball_id) +\
                     "_" + str(block_id)
                 events.append(event)
-        
+
         return events
 
 
@@ -444,4 +382,3 @@ if __name__=="__main__":
     if len(sys.argv)>1:
         ip_address = sys.argv[1]
     main(ip_address)
-
