@@ -67,12 +67,10 @@ class Ball():
                   , (SIZE[Y]//4)*self.color + SIZE[Y]//3 ]
         self.velocity = velocity
         self.alive = 1
-        # Probablemente esto deberia llegar en mensaje
 
     def get_pos(self):
         return self.pos
 
-    # Probablemente esto deberia llegar en mensaje
     def kill(self):
         self.alive = 0
 
@@ -92,7 +90,6 @@ class Ball():
     def bounce(self, AXIS: int):
         self.velocity[AXIS] = -self.velocity[AXIS]
 
-    # Reutilizable como collide block??
     def collide_player(self, side):
         self.bounce(X)
         for _ in range(3):
@@ -122,10 +119,8 @@ class Game():
 
         self.block_lives = manager.dict()
         self.ball_info = manager.dict()
-        # Cambiar esto por el numero correcto
         for i in range(24):
             rand_color = random.randint(0,1)
-            # Es dos la vida inicial de un bloque?
             if i < 12:
                 self.block_lives[i] = (2, rand_color%2
                                        , [600 + 40*(i%2)
@@ -142,25 +137,19 @@ class Game():
 
         self.lock = Lock()
 
-    # OK
     def get_player(self, side: int):
         return self.players_s[side]
 
-    # OK
     def get_ball(self, color: int):
-        # Linea editada
         return self.ball_s[0] if color == 0 else self.ball_s[1]
 
 
-    # OK <-> stop()
     def game_over(self):
         self.running_s.value = 0
 
-    # OK
     def is_running(self):
         return self.running_s.value == 1
 
-    # OK
     # Player <-> Side € {0, 1}
     def moveUp(self, player: int):
         self.lock.acquire()
@@ -181,16 +170,12 @@ class Game():
     def ball_collide(self, player: int, ball_index: int):
         self.lock.acquire()
         ball = self.ball_s[ball_index]
-        print(ball)
-        # Last change
-        # Hace que rebote bien la roja pero mal la azul
+
         ball.collide_player(player)
         self.ball_s[ball_index] = ball
         self.lock.release()
 
-    # Falta ball collide bloque
 
-    # OK
     def movements(self):
         self.lock.acquire()
 
@@ -251,7 +236,6 @@ class Game():
 
 def player(side: int, conn, game):
     try:
-        # print(f"starting player {SIDESSTR[side]}:{game.get_info()}")
         conn.send( (side, game.get_info()) )
         while game.is_running():
             command = ""
@@ -300,8 +284,6 @@ def player(side: int, conn, game):
 
                 if command == "quit":
                     game.game_over()
-            # IMP
-            # game.movements()
             if side == 1:
                 game.movements()
             conn.send(game.get_info())
@@ -311,8 +293,6 @@ def player(side: int, conn, game):
     finally:
         print(f"Game ended {game}")
 
-# QUASI OK
-# Seguramente falten adiciones
 def main(ip_address):
     manager = Manager()
 
