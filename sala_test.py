@@ -82,8 +82,8 @@ class Ball():
     def bounce(self, AXIS: int):
         self.velocity[AXIS] = -self.velocity[AXIS]
 
-    def collide_player(self, side):
-        self.bounce(Y)
+    def collide_player(self, AXIS):
+        self.bounce(AXIS)
         for _ in range(3):
             self.update()
 
@@ -164,8 +164,26 @@ class Game():
         self.lock.acquire()
         ball = self.ball_s[ball_index]
 
-        ball.collide_player(player)
+        ball.collide_player(Y)
         self.ball_s[ball_index] = ball
+        self.lock.release()
+        
+    def block_collide(self, block_index: int, ball_index: int):
+        self.lock.acquire()
+        
+        [block_width , block_height] = BLOCK_SIZE
+        [block_x , block_y]= self.block_lives[block_index][3]
+        ball = self.ball_s[ball_index]
+        [ball_x,ball_y]= ball.pos
+        
+        AXIS = Y if ((abs(block_y - ball_y - SIZE_BALL) < block_width*0.1)
+                            or (abs( block_y + block_height - ball_y) < block_width*0.1)) else X
+        # AXIS = Y if ((abs(block.rect.top - ball.rect.bottom) < block.rect.width*0.1)
+        #                     or (abs(block.rect.bottom - ball.rect.top) < block.rect.width*0.1)) else X
+        
+        
+
+        ball.collide_player(AXIS)
         self.lock.release()
 
 
@@ -266,6 +284,7 @@ def player(side: int, conn, game):
                         ball_index = int(command_list[-2])
                         block_index = int(command_list[-1])
                         game.ball_collide(side, ball_index)
+                        #game.block_collide(block_index, ball_index)
                         # Si bola.color == bloque.color, bloque.vida -= 1
                         if game.ball_s[ball_index].color != game.block_lives[block_index][1]:
                             game.set_block_lives(block_index)
