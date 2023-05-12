@@ -52,11 +52,6 @@ class Ball():
 
 class Block():
     def __init__(self, block_id: int, color: int):
-        # if block_id < 12:
-        #     self.pos      = [600 + 40*(block_id%2), 20 + 40*block_id]
-        # else:
-        #     self.pos      = [600 + 40*((1+(block_id%12))%2)
-        #                      , 20 + 40*(block_id%12)]
         self.pos      = [0,0]
         self.color    = None
         self.vidas    = None
@@ -86,7 +81,7 @@ class Game():
         self.players = [Player(i) for i in range(2)]
         self.balls   = [Ball(i,i) for i in range(2)]
         self.blocks  = [Block(i, i%2) for i in range(12)] \
-                        + [Block(i, 0) for i in range(12, 24)]
+                        + [Block(i, 0) for i in range(12, NBLOQUES)]
         self.running = True
 
     def get_player(self, side: int):
@@ -143,7 +138,7 @@ class Game():
             # Color bolas, si hay que hacer cambio (val = 1)
             # Alternamos el color
         # self.bloques_dict=(gameinfo['bloques_dict'])
-        for i in range(24):
+        for i in range(NBLOQUES):
 
             self.blocks[i].set_vidas(self.blocks_dict[i][0])
             self.blocks[i].set_color(self.blocks_dict[i][1])
@@ -255,7 +250,7 @@ class Display():
     def __init__(self, game, side: int):
         self.quit        = False
         self.game        = game
-        self.list_blocks = list(range(24))
+        self.list_blocks = list(range(NBLOQUES))
         self.list_balls  = list(range(2))
 
         # sprite groups
@@ -292,9 +287,9 @@ class Display():
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         events.append("quit")
-                    elif event.key == pygame.K_UP:
+                    elif event.key == pygame.K_LEFT:
                         events.append("up")
-                    elif event.key == pygame.K_DOWN:
+                    elif event.key == pygame.K_RIGHT:
                         events.append("down")
                 elif event.type == pygame.QUIT:
                     events.append("quit")
@@ -302,7 +297,7 @@ class Display():
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         events.append("quit")
-                    elif event.key == pygame.K_k:
+                    elif event.key == pygame.K_n:
                         events.append("up")
                     elif event.key == pygame.K_m:
                         events.append("down")

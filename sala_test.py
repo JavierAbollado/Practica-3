@@ -111,7 +111,7 @@ class Game():
 
         self.block_lives = manager.dict()
         self.ball_info = manager.dict()
-        for i in range(24):
+        for i in range(NBLOQUES):
             rand_color = random.randint(0,1)
             if i < 12:
                 self.block_lives[i] = (2
@@ -262,7 +262,6 @@ def player(side: int, conn, game):
                     # X: jugador(side) Y: ball_index , Z : block_index
                     # Supongamos la existencia de una constante inicial NBLOQUES         
                     elif command_list[1] == "b" :
-                        NBLOQUES = 24
                         side = int(command_list[-3])
                         ball_index = int(command_list[-2])
                         block_index = int(command_list[-1])
