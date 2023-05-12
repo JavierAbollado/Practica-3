@@ -4,7 +4,7 @@ Comienzo de creación del README final de las ramas **conexion_gamma**, **sala_c
 
  - **Francisco Javier Abollado**
  - **David Parro Plaza**
- - **Juan Alvarez Noseque ;)**
+ - **Juan Alvarez San Romualdo**
  
 # Índice 
 
