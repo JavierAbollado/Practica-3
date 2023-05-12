@@ -16,13 +16,21 @@ Comienzo de creación del README final de las ramas **conexion_gamma**, **sala_c
       
 # Distribución de archivos <a name=id0></a>
 
-*Luego pongo alguna pequeña indicación*
+ - sala.py: script que ejecuta la sala. Ejecución:
 
- - sala.py
- - player.py
- - sprites.py
- - constantes.py
- - images/
+```
+{directorio actual} python3 sala.py {ip del ordenador}
+```
+
+ - player.py: script que ejecuta cada uno de los jugadores para jugar. Ejecución:
+
+```
+{directorio actual} python3 player.py {ip del ordenador de la sala}
+```
+
+ - sprites.py: script con los objetos princpales del juego. La mayoria de ellos heredan del objeto *pygame.Sprite*.
+ - constantes.py: contiene las variables globales del juego, como las velocidades de la bola y los jugadores. Así como los gráficos del juego (imagenes de los bloques, palas, y fondos).
+ - images/: carpetas con las imagenes necesarias para el juego. También tenemos en el una carpeta *pruebas* dónde están los gif que observamos en este README.
  
 # Descripción del juego <a name=id1></a>
 
