@@ -209,11 +209,7 @@ class BlockSprite(pygame.sprite.Sprite):
                 self.color = RED_1
 
         self.pos = block.pos
-        self.image = pygame.Surface(BLOCK_SIZE)
-        self.image.fill(self.color)
-        pygame.draw.rect(self.image, BLACK, [0, 0, BLOCK_SIZE[0]
-                                                  , BLOCK_SIZE[1]]
-                                                  , 1)
+        self.image = IM_block[block.color - 1][0]
         self.rect = self.image.get_rect()
         self.rect.left, self.rect.top = self.pos
         self.update()
@@ -225,22 +221,22 @@ class BlockSprite(pygame.sprite.Sprite):
         manda sala.
 
         """
+        tracker = 0
         local_color = self.color
         if self.block.vidas == 0:
             self.kill()
 
         if self.block.color == 0 and self.block.vidas == 1:
             self.color = BLUE_2
+            tracker    = 1
 
 
         if self.block.color == 1 and self.block.vidas == 1:
             self.color = RED_2
+            tracker    = 0
 
         if local_color != self.color:
-            self.image.fill(self.color)
-            pygame.draw.rect(self.image, BLACK, [0, 0, BLOCK_SIZE[0]
-                                                          , BLOCK_SIZE[1]]
-                                                          , 1)
+            self.image = IM_block[tracker][1]
             self.rect = self.image.get_rect()
             self.rect.left, self.rect.top = self.pos
 
@@ -270,6 +266,7 @@ class Display():
         for block in [BlockSprite(self.game.get_block(i))
                       for i in self.list_blocks]:
             self.blocks.add(block)
+        
         self.all_sprites = pygame.sprite.Group()
         self.all_sprites.add(self.paddles)
         self.all_sprites.add(self.balls)
@@ -279,6 +276,7 @@ class Display():
         self.clock =  pygame.time.Clock()  #FPS
         self.background = pygame.image.load("images/fondo_3.jpg")
         pygame.init()
+        self.endgame    = pygame.image.load("images/gameover.png")
 
     def analyze_events(self, side: int):
         events = []
@@ -337,10 +335,14 @@ class Display():
 
 
     def refresh(self):
-        self.all_sprites.update()
-        self.screen.blit(self.background, (0, 0))
-        self.all_sprites.draw(self.screen)
-        pygame.display.flip()
+        if len(self.balls.sprites()) == 0:
+            self.screen.blit(self.endgame, (60, 250))
+            pygame.display.flip()
+        else:
+            self.all_sprites.update()
+            self.screen.blit(self.background, (0, 0))
+            self.all_sprites.draw(self.screen)
+            pygame.display.flip()
 
     def tick(self):
         self.clock.tick(FPS)

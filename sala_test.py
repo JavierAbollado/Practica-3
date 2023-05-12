@@ -111,18 +111,15 @@ class Game():
 
         self.block_lives = manager.dict()
         self.ball_info = manager.dict()
+        fila = 0
         for i in range(NBLOQUES):
             rand_color = random.randint(0,1)
-            if i < 12:
-                self.block_lives[i] = (2
-                                       , rand_color%2
-                                       , [20 + 40*i, 20 + 40*(i%2)])
-            else:
-                self.block_lives[i] = (2
-                                       , rand_color%2
-                                       , [20 + 40*(i%12)
-                                          , 20 + 40*((1+(i%12))%2)])
-
+            self.block_lives[i] = (2
+                                   , rand_color%2
+                                   , [20 + BLOCK_SIZE[0]*(i%12)
+                                      , 20 + BLOCK_SIZE[1]*fila])
+            if i == 11:
+                fila += 1
         for i in range(len(list(self.ball_s))):
             self.ball_info[i] = (1, self.ball_s[i].color
                                  , [self.ball_s[i].pos[0]
@@ -172,18 +169,17 @@ class Game():
         self.lock.acquire()
         
         [block_width , block_height] = BLOCK_SIZE
-        [block_x , block_y]= self.block_lives[block_index][3]
+        [block_x , block_y]= self.block_lives[block_index][2]
         ball = self.ball_s[ball_index]
         [ball_x,ball_y]= ball.pos
         
-        AXIS = Y if ((abs(block_y - ball_y - SIZE_BALL) < block_width*0.1)
+        AXIS = Y if ((abs(block_y - ball_y - BALL_SIZE) < block_width*0.1)
                             or (abs( block_y + block_height - ball_y) < block_width*0.1)) else X
         # AXIS = Y if ((abs(block.rect.top - ball.rect.bottom) < block.rect.width*0.1)
         #                     or (abs(block.rect.bottom - ball.rect.top) < block.rect.width*0.1)) else X
         
-        
-
         ball.collide_player(AXIS)
+        self.ball_s[ball_index] = ball
         self.lock.release()
 
 
@@ -283,8 +279,8 @@ def player(side: int, conn, game):
                         side = int(command_list[-3])
                         ball_index = int(command_list[-2])
                         block_index = int(command_list[-1])
-                        game.ball_collide(side, ball_index)
-                        #game.block_collide(block_index, ball_index)
+                        # game.ball_collide(side, ball_index)
+                        game.block_collide(block_index, ball_index)
                         # Si bola.color == bloque.color, bloque.vida -= 1
                         if game.ball_s[ball_index].color != game.block_lives[block_index][1]:
                             game.set_block_lives(block_index)

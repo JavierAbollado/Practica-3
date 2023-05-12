@@ -36,7 +36,7 @@ NBLOQUES = 24
 # ball & block
 BALL_COLOR = WHITE
 BALL_SIZE = 12
-BLOCK_SIZE =[40,40]
+BLOCK_SIZE =[40,30]
 FPS = 60
 DELTA = 30 
 VEL_BALL_X, VEL_BALL_Y = 2, 2 # velocidad de la bola
@@ -52,5 +52,5 @@ load_rotate_image = lambda file_name, size, angle : pygame.transform.scale(pygam
 
 IM_background = load_image("blackbackground.png", SIZE)
 IM_gameover = load_image("gameover.png", (SIZE[0]//2, SIZE[1]//5))
-IM_block = [[load_image(f"rojo{i+1}.png", (10*BLOCK_SIZE[0]//8, 10*BLOCK_SIZE[1]//8)) for i in range(4)], [load_image(f"azul{i+1}.png", (10*BLOCK_SIZE[0]//8, 10*BLOCK_SIZE[1]//8)) for i in range(4)]]
+IM_block = [[load_image(f"rojo{3*i + 1}.png", (BLOCK_SIZE[0], BLOCK_SIZE[1])) for i in range(2)], [load_image(f"azul{3*i +1}.png", (BLOCK_SIZE[0], BLOCK_SIZE[1])) for i in range(2)]]
 IM_player = [load_rotate_image(name, PLAYER_SIZE, 90) for name in ["paleta_roja.png", "paleta_azul.png"]]
