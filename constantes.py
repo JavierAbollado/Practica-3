@@ -24,7 +24,7 @@ Y = 1
 # general
 SIZE = (700, 700) #525)
 FPS = 60
-DELTA = 5 
+DELTA = 10 # cantidad que se mueven las palas (velocidad)
 SIDES = ["left", "right"]
 
 # player 
@@ -36,7 +36,7 @@ PLAYER_SIZE = (80,15) #(15,80)
 # ball
 BALL_COLOR = WHITE
 BALL_SIZE = 12
-BALL_VEL = (3,2)  #(2, 3) # velocidad de la bola
+BALL_VEL = (6,4)  #(2, 3) # velocidad de la bola
 
 # block
 BLOCK_SIZE = (55,25) # (25,55)
