@@ -65,7 +65,7 @@ El núcleo de juego se hace en una única función *play* controlada por un solo
  
 La sala comienza el juego con un proceso *game* que ejecuta el target *play()* en donde se encuentra el bucle de juego con las comunicaciones entre la sala y los jugadores. Para ello se pasa como argumento al *play* ambas conexiones para poder controlarlos. 
 
- ```
+ ```python
 game = Process(target=play, args=(connections[0], connections[1]))
 game.start()
  ```
