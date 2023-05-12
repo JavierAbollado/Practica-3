@@ -17,9 +17,9 @@ class Player():
     def __init__(self, side: int):
         self.side = side
         if side == PLAYER_1:
-            self.pos = [10, SIZE[Y]//4]
+            self.pos = [SIZE[X]//4, 690]
         else:
-            self.pos = [10, 3*SIZE[Y]//4]
+            self.pos = [3*SIZE[X]//4, 690]
 
     def get_pos(self):
         return self.pos
@@ -28,14 +28,14 @@ class Player():
         return self.side
 
     def moveDown(self):
-        self.pos[Y]    += DELTA
-        if self.pos[Y]  > SIZE[Y]:
-            self.pos[Y] = SIZE[Y]
+        self.pos[X]    += DELTA
+        if self.pos[X]  > SIZE[X]:
+            self.pos[X] = SIZE[X]
 
     def moveUp(self):
-        self.pos[Y]    -= DELTA
-        if self.pos[Y]  < 0:
-            self.pos[Y] = 0
+        self.pos[X]    -= DELTA
+        if self.pos[X]  < 0:
+            self.pos[X] = 0
 
     def __str__(self):
         return f"P<{SIDES[self.side], self.pos}>"
@@ -114,13 +114,14 @@ class Game():
         for i in range(24):
             rand_color = random.randint(0,1)
             if i < 12:
-                self.block_lives[i] = (2, rand_color%2
-                                       , [600 + 40*(i%2)
-                                       , 20 + 40*i])
+                self.block_lives[i] = (2
+                                       , rand_color%2
+                                       , [20 + 40*i, 20 + 40*(i%2)])
             else:
-                self.block_lives[i] = (2, rand_color%2
-                                       , [600 + 40*((1+(i%12))%2)
-                                       , 20 + 40*(i%12)])
+                self.block_lives[i] = (2
+                                       , rand_color%2
+                                       , [20 + 40*(i%12)
+                                          , 20 + 40*((1+(i%12))%2)])
 
         for i in range(len(list(self.ball_s))):
             self.ball_info[i] = (1, self.ball_s[i].color
@@ -237,12 +238,14 @@ def player(side: int, conn, game):
                     game.moveUp(side)
                 elif command == "down":
                     game.moveDown(side)
-                    
+                # collide_p_b_X_Y, X : side, Y : ball_index
+                # Combandos colision bola-pala
                 elif command == "quit":
                     game.game_over()
                 # collide_p_b_X_Y, X : side, Y : ball_index
                 # Combandos colision bola-pala
-                else :
+                elif command != "next":
+                    print(command)
                     command_list=command.split("_")
                     
                     if command_list[1] == "p" :

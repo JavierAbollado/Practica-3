@@ -52,6 +52,11 @@ class Ball():
 
 class Block():
     def __init__(self, block_id: int, color: int):
+        # if block_id < 12:
+        #     self.pos      = [600 + 40*(block_id%2), 20 + 40*block_id]
+        # else:
+        #     self.pos      = [600 + 40*((1+(block_id%12))%2)
+        #                      , 20 + 40*(block_id%12)]
         self.pos      = [0,0]
         self.color    = None
         self.vidas    = None

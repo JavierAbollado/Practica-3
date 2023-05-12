@@ -21,13 +21,13 @@ PLAYER_COLOR = [RED_1, BLUE]
 # ejes
 X = 0
 Y = 1
-SIZE = (700, 525)
+SIZE = (525, 700)
 
 # player 
 LEFT_PLAYER = 0
 RIGHT_PLAYER = 1
-PLAYER_HEIGHT = 10
-PLAYER_WIDTH = 60
+PLAYER_HEIGHT = 60
+PLAYER_WIDTH = 10
 PLAYER_1 = 0
 PLAYER_2 = 1
 PLAYER_SIZE = (PLAYER_HEIGHT, PLAYER_WIDTH)
@@ -52,4 +52,4 @@ load_rotate_image = lambda file_name, size, angle : pygame.transform.scale(pygam
 IM_background = load_image("blackbackground.png", SIZE)
 IM_gameover = load_image("gameover.png", (SIZE[0]//2, SIZE[1]//5))
 IM_block = [[load_image(f"rojo{i+1}.png", (10*BLOCK_SIZE[0]//8, 10*BLOCK_SIZE[1]//8)) for i in range(4)], [load_image(f"azul{i+1}.png", (10*BLOCK_SIZE[0]//8, 10*BLOCK_SIZE[1]//8)) for i in range(4)]]
-IM_player = [load_rotate_image(name, PLAYER_SIZE, 0) for name in ["paleta_roja.png", "paleta_azul.png"]]
+IM_player = [load_rotate_image(name, PLAYER_SIZE, 90) for name in ["paleta_roja.png", "paleta_azul.png"]]
