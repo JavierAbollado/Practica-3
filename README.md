@@ -59,7 +59,7 @@ Se encarga de checkear las acciones de su pala (moverse a izquierda o derecha). 
 
 Controla el núcleo de juego, las acciones principales como los choques entre bloques y bolas y los choques con las palas son controlados por la sala principal. El sentido de esta modificación es que si dejamos estas acciones a los jugadores, cada vez que ocurra algo será detectado doblemente (una por cada jugador), además podría pasar que uno detecte una acción y otro no (aunque luego sería procesado por la sala al comunicarse). Esta información será pasada a los jugadores en un formato de códigos que explicaremos en la siguiente sección. 
  
-El núcleo de juego se hace en una única función *play* controlada por un solo proceso, al contrario que en la versión principal que tiene una proceso para cada jugador. Con esto evitamos la inanición en el objeto *Game* ya que solo accede a él un único proceso. Por lo que no es necesario introducir un *Lock()* y controlar con un *acquaire()* y *release()* cada una de las funciones, ya que pasarían a ser no críticas. En el siguiente apartado, ilustraré como se consigue esta comunicación entre ambos jugadores y la sala sin necesidad de locks. 
+El núcleo de juego se hace en una única función *play* controlada por un solo proceso, al contrario que en la versión principal que tiene una proceso para cada jugador. Con esto aseguramos la exclusión mutua en el objeto *Game* ya que solo accede a él un único proceso. Por lo que no es necesario introducir un *Lock()* y controlar con un *acquaire()* y *release()* cada una de las funciones, ya que pasarían a ser no críticas. En el siguiente apartado, ilustraré como se consigue esta comunicación entre ambos jugadores y la sala. 
  
 ## Comunicación 
  
@@ -78,7 +78,7 @@ game.start()
  
  **B) Parte 2 [bucle de juego]**
  
- Voy a comentar las acciones por pares. Cada send() necesita en recv() por parte de la otra conexión, y viceversa, cada recv() necesita que la otra conexión le halla mandado un send() para poder recibirla. Asi comentaremos las acciones por pares (Jn, Sn) para que se entienda qué información se está recibiendo y de dónde. Tener en cuenta que la sala hará dos envios y dos recivos por cada recivo y envio del script del player respectivamente, ya que son dos. 
+ Voy a comentar las acciones por pares. Cada send() necesita en recv() por parte de la otra conexión, y viceversa, cada recv() necesita que la otra conexión le halla mandado un send() para poder recibirla. En caso de no tener esta paridad abría un problema de inanición pues uno se quedaría bloqueado esperando a recibir algo. Asi comentaremos las acciones por pares (Jn, Sn) para que se entienda qué información se está recibiendo y de dónde. Tener en cuenta que la sala hará dos envios y dos recivos por cada recivo y envio del script del player respectivamente, ya que son dos. 
  
    **J1.** Jugador manda sus eventos (movimientos de la pala o salir del juego)
  
