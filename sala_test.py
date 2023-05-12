@@ -114,13 +114,14 @@ class Game():
         for i in range(24):
             rand_color = random.randint(0,1)
             if i < 12:
-                self.block_lives[i] = (2, rand_color%2
-                                       , [600 + 40*(i%2)
-                                       , 20 + 40*i])
+                self.block_lives[i] = (2
+                                       , rand_color%2
+                                       , [600 + 40*(i%2), 20 + 40*i])
             else:
-                self.block_lives[i] = (2, rand_color%2
+                self.block_lives[i] = (2
+                                       , rand_color%2
                                        , [600 + 40*((1+(i%12))%2)
-                                       , 20 + 40*(i%12)])
+                                          , 20 + 40*(i%12)])
 
         for i in range(len(list(self.ball_s))):
             self.ball_info[i] = (1, self.ball_s[i].color

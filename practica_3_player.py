@@ -52,11 +52,7 @@ class Ball():
 
 class Block():
     def __init__(self, block_id: int, color: int):
-        if block_id < 12:
-            self.pos      = [600 + 40*(block_id%2), 20 + 40*block_id]
-        else:
-            self.pos      = [600 + 40*((1+(block_id%12))%2)
-                             , 20 + 40*(block_id%12)]
+        self.pos      = [0,0]
         self.color    = None
         self.vidas    = None
         self.block_id = block_id
@@ -141,11 +137,13 @@ class Game():
             self.balls[i].set_color(self.balls_dict[i][1])
             # Color bolas, si hay que hacer cambio (val = 1)
             # Alternamos el color
-        self.bloques_dict=(gameinfo['bloques_dict'])
+        # self.bloques_dict=(gameinfo['bloques_dict'])
         for i in range(24):
 
             self.blocks[i].set_vidas(self.blocks_dict[i][0])
             self.blocks[i].set_color(self.blocks_dict[i][1])
+            self.blocks[i].set_pos(self.blocks_dict[i][2])
+
 
     def is_running(self):
         return self.running
