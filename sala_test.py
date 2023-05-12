@@ -271,38 +271,7 @@ def player(side: int, conn, game):
                         # Si bola.color == bloque.color, bloque.vida -= 1
                         if game.ball_s[ball_index].color != game.block_lives[block_index][1]:
                             game.set_block_lives(block_index)
-                        
-
-             # for termination in [str(side)+"_"+str(j)
-             #                        for j in range(2)]:
-             #        partida = termination.split("_")
-             #        # Son str hay que cambiar tipo a int
-             #        side_info = int(partida[-2])
-             #        ball_index = int(partida[-1])
-             #        if command == "collide_p_b_" + termination :
-             #            game.ball_collide(side_info, ball_index)
-             #            # mismo color y cambiamos al opuesto
-             #            if side_info != game.ball_s[ball_index].color:
-             #                game.change_colors_g(ball_index)
-                
-             #    NBLOQUES = 24 
-             #    for termination in [str(side) + "_" + str(i) + "_" + str(j)
-             #                        for i in range(2)
-             #                        for j in range(NBLOQUES)]:
-             #        partida = termination.split("_")
-             #        # Son str hay que convertir a int
-             #        side = int(partida[-3])
-             #        ball_index = int(partida[-2])
-             #        block_index = int(partida[-1])
-             #        if command == "collide_b_b_" + termination:
-
-             #            game.ball_collide(side, ball_index)
-             #            # Si bola.color == bloque.color, bloque.vida -= 1
-             #            if game.ball_s[ball_index].color != game.block_lives[block_index][1]:
-             #                game.set_block_lives(block_index)
-
-             #    if command == "quit":
-             #        game.game_over()    
+          
             if side == 1:
                 game.movements()
             conn.send(game.get_info())
