@@ -83,7 +83,7 @@ class Ball():
         self.velocity[AXIS] = -self.velocity[AXIS]
 
     def collide_player(self, side):
-        self.bounce(X)
+        self.bounce(Y)
         for _ in range(3):
             self.update()
 
@@ -176,11 +176,11 @@ class Game():
             ball = self.ball_s[index]
             ball.update()
             pos = ball.get_pos()
-            if pos[Y]<0 or pos[Y]>SIZE[Y]:
-                ball.bounce(Y)
-            if pos[X]>SIZE[X]:
+            if pos[X] < 0 or pos[X]>SIZE[X]:
                 ball.bounce(X)
-            elif pos[X]<0:
+            if pos[Y] < 0:
+                ball.bounce(Y)
+            elif pos[Y] > SIZE[Y]:
                 ball.kill()
             self.ball_s[index] = ball
             self.ball_info[index] = (ball.get_status()
@@ -245,7 +245,6 @@ def player(side: int, conn, game):
                 # collide_p_b_X_Y, X : side, Y : ball_index
                 # Combandos colision bola-pala
                 elif command != "next":
-                    print(command)
                     command_list=command.split("_")
                     
                     if command_list[1] == "p" :
