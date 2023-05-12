@@ -1,5 +1,3 @@
-Comienzo de creación del README final de las ramas **conexion_gamma**, **sala_control** y **sala_control_2**.
-
 # Práctica 3 - Juego multijugador (2 jugadores)
 
  - **Francisco Javier Abollado**
