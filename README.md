@@ -50,13 +50,52 @@ Se trata de una versión modificada del Arkanoid. En ella nos encontramos 2 pale
 
 Para tener conectados los dos jugadores y la sala principal procederemos de la siguente manera:
 
-### Sala
-
-Controla el núcleo de juego, las acciones principales como los choques entre bloques y bolas y los choques con las palas son controlados por la sala principal. El sentido de esta modificación es que si dejamos estas acciones a los juegadores, cada vez que ocurra algo será detectado doblemente (una por cada jugador), además podría pasar que uno detecte una acción y otro no (aunque luego sería procesado por la sala al comunicarse). Esta información será pasada a los jugadores en un formato de códigos que explicaremos en la siguiente sección. 
 
 ### Player
 
 Se encarga de checkear las acciones de su pala (moverse a izquierda o derecha). Esta información se la pasa a la sala y la sala se encarga de pasarla al otro jugador y de actualizarla en su display. Por otro lado recibe las acciones procesadas por la sala y se encarga de descodificarlas y realizar las respectivas actualizaciones necesarias.
+
+### Sala
+
+Controla el núcleo de juego, las acciones principales como los choques entre bloques y bolas y los choques con las palas son controlados por la sala principal. El sentido de esta modificación es que si dejamos estas acciones a los jugadores, cada vez que ocurra algo será detectado doblemente (una por cada jugador), además podría pasar que uno detecte una acción y otro no (aunque luego sería procesado por la sala al comunicarse). Esta información será pasada a los jugadores en un formato de códigos que explicaremos en la siguiente sección. 
+ 
+El núcleo de juego se hace en una única función *play* controlada por un solo proceso, al contrario que en la versión principal que tiene una proceso para cada jugador. Con esto evitamos la inanición en el objeto *Game* ya que solo accede a él un único proceso. Por lo que no es necesario introducir un *Lock()* y controlar con un *acquaire()* y *release()* cada una de las funciones, ya que pasarían a ser no críticas. En el siguiente apartado, ilustraré como se consigue esta comunicación entre ambos jugadores y la sala sin necesidad de locks. 
+ 
+### Comunicación 
+ 
+La sala comienza el juego con un proceso *game* que ejecuta el target *play()* en donde se encuentra el bucle de juego con las comunicaciones entre la sala y los jugadores. Para ello se pasa como argumento al *play* ambas conexiones para poder controlarlos. 
+
+ ```
+game = Process(target=play, args=(connections[0], connections[1]))
+game.start()
+ ```
+ 
+ **A) Parte 1 [antes del bucle de juego]**
+ 
+   - Sala: comenzamos la partida comunicando a cada jugador su id. Para ello la sala manda un *send(id)* a ambos jugadores. 
+ 
+   - Player: cada jugador por separado recibe su id.
+ 
+ **B) Parte 2 [bucle de juego]**
+ 
+ Voy a comentar las acciones por pares. Cada send() necesita en recv() por parte de la otra conexión, y viceversa, cada recv() necesita que la otra conexión le halla mandado un send() para poder recibirla. Asi comentaremos las acciones por pares (Jn, Sn) para que se entienda qué información se está recibiendo y de dónde. Tener en cuenta que la sala hará dos envios y dos recivos por cada recivo y envio del script del player respectivamente, ya que son dos. 
+ 
+   **J1.** Jugador manda sus eventos (movimientos de la pala o salir del juego)
+ 
+   **S1.** Sala recibe eventos de ambos jugadores.
+ 
+   **S2.** Sala envía eventos de un jugador al otro, respectivamente.
+ 
+   **J2.** Jugador recibe eventos del otro jugador (enviados por la sala).
+ 
+   **S3.** Sala actualiza eventos en el display principal. Esto es la función principal del juego **analize_events** que se encarga de comprobar todas las colisiones y golpeos de las pelotas. Una vez analizados envia los cambios a los jugadores.
+ 
+   **J3.** Jugador recibe los cambios de la sala y los actualiza, para ello tener la función **update_from_sala** (las codificaciones y descodificaciones se explicaran en el siguiente apartado). Finalmente cada jugador hace un refresh del display para actualizar por pantalla los cambios.
+
+<div style="text-align:center;">
+  <image src="/images/resumen/sala.jpg" style="width:48%; height:12cm;">
+  <image src="/images/resumen/player.jpg" style="width:48%; height:12cm;">
+</div>Lorem ipsum ..
 
 # Codificación de acciones <a name=id3></a>
 
