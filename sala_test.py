@@ -114,14 +114,13 @@ class Game():
         for i in range(24):
             rand_color = random.randint(0,1)
             if i < 12:
-                self.block_lives[i] = (2
-                                       , rand_color%2
-                                       , [600 + 40*(i%2), 20 + 40*i])
+                self.block_lives[i] = (2, rand_color%2
+                                       , [600 + 40*(i%2)
+                                       , 20 + 40*i])
             else:
-                self.block_lives[i] = (2
-                                       , rand_color%2
+                self.block_lives[i] = (2, rand_color%2
                                        , [600 + 40*((1+(i%12))%2)
-                                          , 20 + 40*(i%12)])
+                                       , 20 + 40*(i%12)])
 
         for i in range(len(list(self.ball_s))):
             self.ball_info[i] = (1, self.ball_s[i].color
@@ -238,45 +237,69 @@ def player(side: int, conn, game):
                     game.moveUp(side)
                 elif command == "down":
                     game.moveDown(side)
+                    
+                elif command == "quit":
+                    game.game_over()
                 # collide_p_b_X_Y, X : side, Y : ball_index
                 # Combandos colision bola-pala
-                for termination in [str(side)+"_"+str(j)
-                                    for j in range(2)]:
-                    partida = termination.split("_")
-                    # Son str hay que cambiar tipo a int
-                    side_info = int(partida[-2])
-                    ball_index = int(partida[-1])
-                    if command == "collide_p_b_" + termination :
+                else :
+                    command_list=command.split("_")
+                    
+                    if command_list[1] == "p" :
+                        side_info = int(command_list[-2])
+                        ball_index = int(command_list[-1])
                         game.ball_collide(side_info, ball_index)
                         # mismo color y cambiamos al opuesto
                         if side_info != game.ball_s[ball_index].color:
                             game.change_colors_g(ball_index)
-                        # else:
-                        #     game.colors_not_changed(ball_index)
-                # Vamos a hacer lo mismo con los bloques
-                # Comandos colision bola-bloque
-                # Color va implicito en side
-                # collide_b_b_X_Y_Z
-                # X: jugador(side) Y: ball_index , Z : block_index
-                # Supongamos la existencia de una constante inicial NBLOQUES
-                NBLOQUES = 24 
-                for termination in [str(side) + "_" + str(i) + "_" + str(j)
-                                    for i in range(2)
-                                    for j in range(NBLOQUES)]:
-                    partida = termination.split("_")
-                    # Son str hay que convertir a int
-                    side = int(partida[-3])
-                    ball_index = int(partida[-2])
-                    block_index = int(partida[-1])
-                    if command == "collide_b_b_" + termination:
-
+                    
+                    # Vamos a hacer lo mismo con los bloques
+                    # Comandos colision bola-bloque
+                    # Color va implicito en side
+                    # collide_b_b_X_Y_Z
+                    # X: jugador(side) Y: ball_index , Z : block_index
+                    # Supongamos la existencia de una constante inicial NBLOQUES         
+                    elif command_list[1] == "b" :
+                        NBLOQUES = 24
+                        side = int(command_list[-3])
+                        ball_index = int(command_list[-2])
+                        block_index = int(command_list[-1])
                         game.ball_collide(side, ball_index)
                         # Si bola.color == bloque.color, bloque.vida -= 1
                         if game.ball_s[ball_index].color != game.block_lives[block_index][1]:
                             game.set_block_lives(block_index)
+                        
 
-                if command == "quit":
-                    game.game_over()
+             # for termination in [str(side)+"_"+str(j)
+             #                        for j in range(2)]:
+             #        partida = termination.split("_")
+             #        # Son str hay que cambiar tipo a int
+             #        side_info = int(partida[-2])
+             #        ball_index = int(partida[-1])
+             #        if command == "collide_p_b_" + termination :
+             #            game.ball_collide(side_info, ball_index)
+             #            # mismo color y cambiamos al opuesto
+             #            if side_info != game.ball_s[ball_index].color:
+             #                game.change_colors_g(ball_index)
+                
+             #    NBLOQUES = 24 
+             #    for termination in [str(side) + "_" + str(i) + "_" + str(j)
+             #                        for i in range(2)
+             #                        for j in range(NBLOQUES)]:
+             #        partida = termination.split("_")
+             #        # Son str hay que convertir a int
+             #        side = int(partida[-3])
+             #        ball_index = int(partida[-2])
+             #        block_index = int(partida[-1])
+             #        if command == "collide_b_b_" + termination:
+
+             #            game.ball_collide(side, ball_index)
+             #            # Si bola.color == bloque.color, bloque.vida -= 1
+             #            if game.ball_s[ball_index].color != game.block_lives[block_index][1]:
+             #                game.set_block_lives(block_index)
+
+             #    if command == "quit":
+             #        game.game_over()    
             if side == 1:
                 game.movements()
             conn.send(game.get_info())
