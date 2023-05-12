@@ -51,17 +51,17 @@ Se trata de una versión modificada del Arkanoid. En ella nos encontramos 2 pale
 Para tener conectados los dos jugadores y la sala principal procederemos de la siguente manera:
 
 
-### Player
+## Player
 
 Se encarga de checkear las acciones de su pala (moverse a izquierda o derecha). Esta información se la pasa a la sala y la sala se encarga de pasarla al otro jugador y de actualizarla en su display. Por otro lado recibe las acciones procesadas por la sala y se encarga de descodificarlas y realizar las respectivas actualizaciones necesarias.
 
-### Sala
+## Sala
 
 Controla el núcleo de juego, las acciones principales como los choques entre bloques y bolas y los choques con las palas son controlados por la sala principal. El sentido de esta modificación es que si dejamos estas acciones a los jugadores, cada vez que ocurra algo será detectado doblemente (una por cada jugador), además podría pasar que uno detecte una acción y otro no (aunque luego sería procesado por la sala al comunicarse). Esta información será pasada a los jugadores en un formato de códigos que explicaremos en la siguiente sección. 
  
 El núcleo de juego se hace en una única función *play* controlada por un solo proceso, al contrario que en la versión principal que tiene una proceso para cada jugador. Con esto evitamos la inanición en el objeto *Game* ya que solo accede a él un único proceso. Por lo que no es necesario introducir un *Lock()* y controlar con un *acquaire()* y *release()* cada una de las funciones, ya que pasarían a ser no críticas. En el siguiente apartado, ilustraré como se consigue esta comunicación entre ambos jugadores y la sala sin necesidad de locks. 
  
-### Comunicación 
+## Comunicación 
  
 La sala comienza el juego con un proceso *game* que ejecuta el target *play()* en donde se encuentra el bucle de juego con las comunicaciones entre la sala y los jugadores. Para ello se pasa como argumento al *play* ambas conexiones para poder controlarlos. 
 
