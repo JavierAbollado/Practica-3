@@ -209,6 +209,7 @@ class Game:
         # variables para info
         self.running = True
         self.win = False
+        self.end = False
 
     # "n" indica el nº de bolas que queremos añadir al juego, 
     # el color de cada bola será aleatorio (entre azul y rojo)
@@ -238,7 +239,10 @@ class Game:
 
     def game_over(self, win):
         self.win = win
-        self.running = False
+        self.end = True
+
+    def is_ended(self):
+        return self.end
 
     def is_running(self):
         return self.running
