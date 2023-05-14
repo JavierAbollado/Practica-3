@@ -188,7 +188,7 @@ class Player_Display():
         self.game.all_sprites.update()
         # Si alguno ha perdido poner activar "Fin del Juego"
         # Según hallas ganado o perdido te aparecerá un mensaje diferente. 
-        if not self.game.is_running():
+        if not self.game.is_ended():
             if self.game.win:
                 self.levelcompleted.draw(self.screen)
             else:
