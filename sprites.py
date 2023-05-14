@@ -106,7 +106,7 @@ class Block(pygame.sprite.Sprite):
         # así inicializamos una secuencia de nº aleatorios fija con "seed(id)".
         random.seed(self.id)
         self.color = random.randint(0,1) # 2 colores € {0,1}
-        self.level = random.randint(0,1) # X niveles € {0,1,...}
+        self.level = random.randint(0,3) # X niveles € {0,1,...}
         
         # gráficos del bloque
         self.image = pygame.Surface(BLOCK_SIZE)
