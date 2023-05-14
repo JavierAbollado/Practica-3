@@ -177,7 +177,7 @@ class Player_Display():
     def update_from_player(self, changes):
         for event in changes:
             if event == "quit":
-                self.stop()
+                self.game.stop()
             elif event == "left":
                 self.game.moveLeft(PLAYERS[self.other_side])
             elif event == "right":
@@ -186,9 +186,16 @@ class Player_Display():
     # Refrescar la pantalla (antes debemos hacer un update)
     def refresh(self):
         self.game.all_sprites.update()
+
+        # check end game
+        if len(self.game.balls) == 0:
+            self.game.game_over(win=False)
+        if len(self.game.blocks) == 0:
+            self.game.game_over(win=True)
+
         # Si alguno ha perdido poner activar "Fin del Juego"
         # Según hallas ganado o perdido te aparecerá un mensaje diferente. 
-        if not self.game.is_ended():
+        if self.game.is_ended():
             if self.game.win:
                 self.levelcompleted.draw(self.screen)
             else:
