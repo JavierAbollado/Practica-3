@@ -133,7 +133,7 @@ def play(conn1, conn2):
             temp = []  # eventos temporales
 
             # crear bloque especial cada X segundos (si no hay otros)
-            X = 5
+            X = 20
             if time.time() - init > X and len(sala.game.blocks_new_balls) == 0:
                 sala.game.add_blocknewballs(sala.id_especial_blocks)
                 sala.id_especial_blocks += 1
