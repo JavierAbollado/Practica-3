@@ -41,7 +41,7 @@ Se trata de una versión modificada del Arkanoid. En ella nos encontramos 2 pale
  Aquí podemos observar un pequeño ejemplo de cómo funcionaría:
 
 <div style="text-align:center;">
-  <image src="/images/resumen/ejemplo.gif" style="width:100%; height:12cm;">
+  <image src="/Version-2/images/resumen/ejemplo.gif" style="width:100%; height:12cm;">
 </div>
 
 # Comunicación : Player 1 - Sala - Player 2 <a name=id2></a>
@@ -91,8 +91,8 @@ game.start()
    **J3.** Jugador recibe los cambios de la sala y los actualiza, para ello tener la función **update_from_sala** (las codificaciones y descodificaciones se explicaran en el siguiente apartado). Finalmente cada jugador hace un refresh del display para actualizar por pantalla los cambios.
 
 <div style="text-align:center;">
-  <image src="/images/resumen/sala.jpg" style="width:48%; height:15cm;">
-  <image src="/images/resumen/player.jpg" style="width:48%; height:15cm;">
+  <image src="/Version-2/images/resumen/sala.jpg" style="width:48%; height:15cm;">
+  <image src="/Version-2/images/resumen/player.jpg" style="width:48%; height:15cm;">
 </div>
 
 # Codificación de acciones <a name=id3></a>
@@ -140,5 +140,5 @@ El *bloque especial* es un bloque el cual si colisiona alguna bola del juego con
  - Ver que los *id* no se bloquean y el random.seed(id) funciona perfectamente con un número indefinido de bolas.
 
 <div style="text-align:center;">
-  <image src="/images/resumen/colisiones_con_bloque_especial.gif" style="width:100%; height:12cm;">
+  <image src="/Version-2/images/resumen/colisiones_con_bloque_especial.gif" style="width:100%; height:12cm;">
 </div>
