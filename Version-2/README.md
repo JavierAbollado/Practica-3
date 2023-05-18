@@ -1,4 +1,4 @@
-# Práctica 3 - Juego multijugador (2 jugadores)
+# Práctica 3
 
  - **Francisco Javier Abollado**
  - **David Parro Plaza**
