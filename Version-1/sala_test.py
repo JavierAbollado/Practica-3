@@ -172,7 +172,7 @@ class Game():
         [block_x , block_y]= self.block_lives[block_index][2]
         ball = self.ball_s[ball_index]
         [ball_x,ball_y]= ball.pos
-        collision=0.1
+        collision=block_height*0.1
         
         if abs( block_y - (ball_y+Ball_size) )<collision:
             ball.collide_player(Y)
