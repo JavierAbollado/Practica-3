@@ -1,4 +1,4 @@
-# Práctica 3
+# Práctica 3 - Juego multiusuario
 
 Realizado por:
 
