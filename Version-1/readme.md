@@ -10,7 +10,7 @@ Esta es una versión de la práctica tiene:
 
 * Si una bola roja colisiona con la pala azul, la bola cambia de color, análogo en el otro caso.
 
-* Controles  player_1: (↑, ↓)  player_2: (k, m)
+* Controles  player_1: (←, →)  player_2: (m, n)
 
 ## Índice
 
