@@ -1,7 +1,7 @@
 import pygame
 import os
 
-# teclas para mover las barras: {a,d} y {4,6}.
+# teclas para mover las barras: {<,>} y {keypad 4, keypad 6}.
 
 # colores
 BLACK = (0, 0, 0)
