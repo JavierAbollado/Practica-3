@@ -171,27 +171,16 @@ class Game():
         [block_width , block_height] = BLOCK_SIZE
         [block_x , block_y]= self.block_lives[block_index][2]
         ball = self.ball_s[ball_index]
-        [ball_x,ball_y]= ball.pos
+        [ball_x, ball_y]= ball.pos
         collision=block_height*0.1
+        def rebote_v_arriba():
+            return  ball_y + BALL_SIZE < block_y + 7 and  ball_y + BALL_SIZE > block_y + 1
+        def rebote_v_abajo():
+            return ball_y < block_y + block_height + 7 and ball_y > block_y + block_height  + 1
+
+        AXIS = Y if (rebote_v_arriba() or rebote_v_abajo()) else X
         
-        if abs( block_y - (ball_y+Ball_size) )<collision:
-            ball.collide_player(Y)
-            
-        if abs((block_y+ block_height) -ball_y)<collision:
-            ball.collide_player(Y)
-            
-        if abs(block_x - (ball_x + Ball_size) )<collision:
-            ball.collide_player(X)  
-            
-        if abs( (block_x + block_width) -ball_x)<collision:
-            ball.collide_player(X)
-        
-        #AXIS = Y if ((abs(block_y - ball_y - BALL_SIZE) < block_width*0.1)
-                          #  or (abs( block_y + block_height - ball_y) < block_width*0.1)) else X
-        # AXIS = Y if ((abs(block.rect.top - ball.rect.bottom) < block.rect.width*0.1)
-        #                     or (abs(block.rect.bottom - ball.rect.top) < block.rect.width*0.1)) else X
-        
-        #ball.collide_player(AXIS)
+        ball.collide_player(AXIS)
         self.ball_s[ball_index] = ball
         self.lock.release()
 
