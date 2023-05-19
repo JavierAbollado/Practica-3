@@ -67,6 +67,7 @@ class Player_Display():
             if event.type == pygame.QUIT:
                 events.append("quit")
                 self.game.stop()
+                self.quit = True
         
         # mover palas: con {4,6} o con {<,>}.
         keys = pygame.key.get_pressed()
@@ -178,6 +179,7 @@ class Player_Display():
         for event in changes:
             if event == "quit":
                 self.game.stop()
+                self.quit = True
             elif event == "left":
                 self.game.moveLeft(PLAYERS[self.other_side])
             elif event == "right":
