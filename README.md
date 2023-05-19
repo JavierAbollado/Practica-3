@@ -1,4 +1,4 @@
-# Práctica 3 - Juego multijugador (2 jugadores)
+# Práctica 3
 
  - **Francisco Javier Abollado**
  - **David Parro Plaza**
@@ -20,7 +20,7 @@
 {directorio actual} python3 sala.py {ip del ordenador}
 ```
 
- - player.py: script que ejecuta cada uno de los jugadores para jugar. Ejecución:
+ - player.py: script que ejecuta cada uno de los jugadores para jugar. Para mover las palas se pueden usar las teclas {keypad 4, keypad 6} o bien {<,>} a gusto del jugador. Ejecución:
 
 ```
 {directorio actual} python3 player.py {ip del ordenador de la sala}
