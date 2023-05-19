@@ -173,12 +173,24 @@ class Game():
         ball = self.ball_s[ball_index]
         [ball_x,ball_y]= ball.pos
         
-        AXIS = Y if ((abs(block_y - ball_y - BALL_SIZE) < block_width*0.1)
-                            or (abs( block_y + block_height - ball_y) < block_width*0.1)) else X
+        if abs( block_y - (ball_y+Ball_size) )<collision:
+            ball.collide_player(Y)
+            
+        if abs((block_y+ block_heigh) -ball_y)<collision:
+            ball.collide_player(Y)
+            
+        if abs(block_x - (ball_x + Ball_size) )<collision:
+            ball.collide_player(X)  
+            
+        if abs( (block_x + block_widt) -ball_x)<collision:
+            ball.collide_player(X)
+        
+        #AXIS = Y if ((abs(block_y - ball_y - BALL_SIZE) < block_width*0.1)
+                          #  or (abs( block_y + block_height - ball_y) < block_width*0.1)) else X
         # AXIS = Y if ((abs(block.rect.top - ball.rect.bottom) < block.rect.width*0.1)
         #                     or (abs(block.rect.bottom - ball.rect.top) < block.rect.width*0.1)) else X
         
-        ball.collide_player(AXIS)
+        #ball.collide_player(AXIS)
         self.ball_s[ball_index] = ball
         self.lock.release()
 
