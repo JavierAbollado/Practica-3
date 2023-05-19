@@ -176,13 +176,13 @@ class Game():
         if abs( block_y - (ball_y+Ball_size) )<collision:
             ball.collide_player(Y)
             
-        if abs((block_y+ block_heigh) -ball_y)<collision:
+        if abs((block_y+ block_height) -ball_y)<collision:
             ball.collide_player(Y)
             
         if abs(block_x - (ball_x + Ball_size) )<collision:
             ball.collide_player(X)  
             
-        if abs( (block_x + block_widt) -ball_x)<collision:
+        if abs( (block_x + block_width) -ball_x)<collision:
             ball.collide_player(X)
         
         #AXIS = Y if ((abs(block_y - ball_y - BALL_SIZE) < block_width*0.1)
