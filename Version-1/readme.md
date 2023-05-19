@@ -62,4 +62,4 @@ Cualquier bug abrid una issue
 
  - **Francisco Javier Abollado**
  - **David Parro Plaza**
- - **Juan Alvarez Noseque ;)**
+ - **Juan Alvarez San Romualdo**
