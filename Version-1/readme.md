@@ -47,7 +47,7 @@ Esta versión sigue un esquema más primitivo naïve de comunicación:
 
 * Un dispositvo hará de sala, en una terminal ejecutará:
 ```
-python3 sala_test.py  <ipv4_equipo_1>
+python3 practica_3_sala.py  <ipv4_equipo_1>
 ```
 * El resto de dispositivos, en la misma red, pueden conectarse con:
 ```
